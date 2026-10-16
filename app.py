@@ -126,7 +126,10 @@ class AnalysisRecord(db.Model):
 
 # Create database tables if they do not exist
 with app.app_context():
-    db.create_all()
+    try:
+        db.create_all()
+    except Exception as e:
+        logger.debug(f"Table initialization notice: {e}")
 
 
 # ============================================================================

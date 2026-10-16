@@ -8,6 +8,11 @@
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/logo.svg') }}">
   
+  <!-- Typography: Inter & JetBrains Mono (Stitch Luminescent Precision) + Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <!-- Stylesheets -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   
@@ -186,6 +191,52 @@
       </footer>
     </div>
   </div>
+
+  <!-- Mobile Floating Glass Navigation Dock (Stitch Liquid Obsidian) -->
+  <nav class="glass-dock" id="mobileGlassDock" aria-label="Mobile Navigation">
+    <a href="{{ url_for('index') }}" class="dock-link {% if request.endpoint == 'index' %}active{% endif %}" {% if request.endpoint == 'index' %}aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Overview</span>
+    </a>
+
+    <a href="{{ url_for('analyze') }}" class="dock-link {% if request.endpoint == 'analyze' %}active{% endif %}" {% if request.endpoint == 'analyze' %}aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="16"/>
+        <line x1="8" y1="12" x2="16" y2="12"/>
+      </svg>
+      <span>Analyze</span>
+    </a>
+
+    <a href="{{ url_for('history') }}" class="dock-link {% if request.endpoint == 'history' %}active{% endif %}" {% if request.endpoint == 'history' %}aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      <span>History</span>
+    </a>
+
+    <a href="{{ url_for('inventory_catalogue') }}" class="dock-link {% if request.endpoint == 'inventory_catalogue' %}active{% endif %}" {% if request.endpoint == 'inventory_catalogue' %}aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+        <line x1="8" y1="21" x2="16" y2="21"/>
+        <line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      <span>Inventory</span>
+    </a>
+
+    <a href="{{ url_for('about') }}" class="dock-link {% if request.endpoint == 'about' %}active{% endif %}" {% if request.endpoint == 'about' %}aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="16" x2="12" y2="12"/>
+        <line x1="12" y1="8" x2="12.01" y2="8"/>
+      </svg>
+      <span>About</span>
+    </a>
+  </nav>
 
   <!-- Scripts -->
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>

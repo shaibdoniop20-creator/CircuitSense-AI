@@ -39,6 +39,8 @@ instance/*.sqlite3
 .pytest_cache/
 .coverage
 htmlcov/
+scratch/
+.agents/
 
 # User uploads & generated assets (keep folder structure)
 uploads/*

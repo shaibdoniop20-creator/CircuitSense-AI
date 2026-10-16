@@ -17,7 +17,7 @@ def test_real_board_image():
     sample_images = list(uploads_dir.glob("*.jpeg")) + list(uploads_dir.glob("*.jpg"))
     if not sample_images:
         print("ERROR: No sample circuit board image found in uploads/")
-        return False
+        assert False, "No sample circuit board image found in uploads/"
 
     test_img_path = sample_images[0]
     print(f"--> Using circuit board image: {test_img_path.name}")
@@ -96,8 +96,7 @@ def test_real_board_image():
         print(f"--> PDF report generated successfully ({len(pdf_resp.data)} bytes)!")
 
         print("\n================ ALL CHECKS PASSED ================\n")
-        return True
 
 if __name__ == "__main__":
-    success = test_real_board_image()
-    sys.exit(0 if success else 1)
+    test_real_board_image()
+    sys.exit(0)
