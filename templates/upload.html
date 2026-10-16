@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Circuit Board for Analysis{% endblock %}
+{% block page_breadcrumb %}New Analysis{% endblock %}
+
+{% block content %}
+<div style="max-width: 1080px; margin: 0 auto;">
+  <!-- Section Title -->
+  <div style="margin-bottom: 28px;">
+    <h1 style="font-size: 2.2rem; font-weight: 700; letter-spacing: -0.6px; color: #FFFFFF;">
+      Circuit Board Image Ingestion
+    </h1>
+    <p style="color: var(--text-secondary); font-size: 1rem; margin-top: 6px;">
+      Upload a clear photograph of a dismantled printed circuit board (PCB) to identify reusable components, estimate salvage values, and evaluate hazardous materials.
+    </p>
+  </div>
+
+  <!-- Operational Mode Info -->
+  {% if model_status.is_demo %}
+  <div class="alert-banner alert-demo" style="margin-bottom: 28px;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <div>
+      <strong>Notice: Demonstration Pipeline Active.</strong> 
+      Awaiting custom trained YOLO model in <code>models/best.pt</code>. 
+      The application will execute real OpenCV optical edge/contour extraction on your uploaded image to localize physical components. 
+      Predictions will be labeled as simulated.
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Upload Form -->
+  <form id="uploadForm" action="{{ url_for('analyze') }}" method="POST" enctype="multipart/form-data">
+    <div class="upload-grid">
+      <!-- Left Column: Dropzone & Image Preview -->
+      <div class="glass-card" style="display: flex; flex-direction: column;">
+        <h3 style="font-size: 1.15rem; font-weight: 600; margin-bottom: 16px; color: #FFFFFF; display: flex; align-items: center; gap: 8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+          1. Select Circuit Board Image
+        </h3>
+
+        <!-- Interactive Drag & Drop Area -->
+        <div class="dropzone-container" id="dropzone">
+          <input type="file" id="fileInput" name="image" accept=".jpg,.jpeg,.png,.webp" style="display: none;">
+          
+          <div class="dropzone-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+
+          <div class="dropzone-text">
+            <h3>Drag & drop circuit photo here</h3>
+            <p>or click to browse your local device files</p>
+          </div>
+
+          <span class="file-specs">Supported: JPG, JPEG, PNG, WEBP (Max 16 MB)</span>
+          
+          <button type="button" class="btn btn-secondary btn-sm" id="browseBtn" style="margin-top: 8px;">
+            Browse Image Files
+          </button>
+        </div>
+
+        <!-- Selected Image Preview Card -->
+        <div class="preview-card" id="previewCard">
+          <img id="previewImg" src="" alt="Selected PCB Preview">
+          
+          <div class="preview-overlay">
+            <button type="button" class="btn btn-secondary btn-sm" id="removeImgBtn" title="Remove and choose another image">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+              Remove
+            </button>
+          </div>
+
+          <div class="preview-details">
+            <div>
+              <strong id="previewFilename" style="color: #FFF; font-size: 0.9rem;">filename.jpg</strong>
+              <div id="previewMeta" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">Dimensions &bull; Size</div>
+            </div>
+            <span class="badge badge-cyan">Ready for AI</span>
+          </div>
+        </div>
+
+        <!-- Inline Error Message -->
+        <div id="uploadError" style="display: none; margin-top: 14px;" class="alert-banner alert-danger">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span id="uploadErrorText">Error message</span>
+        </div>
+      </div>
+
+      <!-- Right Column: Optional Metadata & Inference Configuration -->
+      <div class="glass-card upload-controls">
+        <h3 style="font-size: 1.15rem; font-weight: 600; color: #FFFFFF; display: flex; align-items: center; gap: 8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          2. Board Context & Settings
+        </h3>
+
+        <!-- Board Category (Optional) -->
+        <div class="form-group">
+          <label class="form-label" for="boardCategory">
+            Board Category
+            <small>(Guides Material Analysis)</small>
+          </label>
+          <select id="boardCategory" name="board_category" class="form-select">
+            <option value="unknown" selected>Unknown / Unspecified (Triggers Mode B)</option>
+            <option value="motherboard">Computer / Server Motherboard</option>
+            <option value="graphics_card">Graphics Card (GPU / Video Board)</option>
+            <option value="controller_board">Embedded Controller / IoT Board</option>
+            <option value="power_supply_board">Power Supply Board (SMPS / Inverter)</option>
+          </select>
+          <small style="font-size: 0.75rem; color: var(--text-muted);">
+            Selecting a known category enables Mode A empirical chemical mass estimation.
+          </small>
+        </div>
+
+        <!-- Board Condition (Optional) -->
+        <div class="form-group">
+          <label class="form-label" for="boardCondition">
+            Physical Board Condition
+            <small>(Adjusts Salvage Multiplier)</small>
+          </label>
+          <select id="boardCondition" name="board_condition" class="form-select">
+            <option value="intact" selected>Intact (Clean salvage, 1.0x factor)</option>
+            <option value="dismantled">Dismantled (Handling wear, 0.85x factor)</option>
+            <option value="damaged">Damaged (Physical fractures, 0.40x factor)</option>
+            <option value="corroded">Corroded (Heavy oxidation, 0.20x factor)</option>
+          </select>
+        </div>
+
+        <!-- Confidence Threshold Filter -->
+        <div class="form-group">
+          <label class="form-label" for="confidenceSlider">
+            Inference Confidence Threshold
+            <span class="range-val" id="confidenceVal">25%</span>
+          </label>
+          <div class="slider-container">
+            <input type="range" id="confidenceSlider" name="confidence" min="0.10" max="0.90" step="0.05" value="0.25" class="form-range">
+          </div>
+          <small style="font-size: 0.75rem; color: var(--text-muted);">
+            Minimum score for bounding box proposal (default: 0.25).
+          </small>
+        </div>
+
+        <!-- Submission Button & Reset -->
+        <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 10px;">
+          <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%;" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            Analyze Circuit Board
+          </button>
+
+          <button type="button" id="resetBtn" class="btn btn-outline btn-sm" style="width: 100%;">
+            Reset Form
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Animated Processing Modal Overlay -->
+<div class="processing-overlay" id="processingOverlay">
+  <div class="processing-card">
+    <div class="liquid-spinner"></div>
+    <h3 style="font-size: 1.35rem; font-weight: 700; color: #FFFFFF;">Analyzing Circuit Board</h3>
+    <p id="processingStatusText" style="color: var(--text-secondary); font-size: 0.92rem;">
+      Ingesting image & validating dimensions...
+    </p>
+    <div style="width: 100%; background: rgba(255, 255, 255, 0.1); height: 4px; border-radius: 2px; overflow: hidden; margin-top: 8px;">
+      <div id="processingProgressBar" style="width: 20%; height: 100%; background: var(--accent-primary); transition: width 0.4s ease;"></div>
+    </div>
+    <small style="font-size: 0.72rem; color: var(--text-muted);">
+      Ultralytics YOLOv8 inference &middot; OpenCV component crops &middot; Valuation engine
+    </small>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+{% endblock %}

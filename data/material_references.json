@@ -1,0 +1,233 @@
+{
+  "reference_metadata": {
+    "version": "1.1.0",
+    "last_reviewed": "2026-03-01",
+    "sources": [
+      "UNEP / UNU Global E-Waste Monitor - Material Flow & Composition Benchmarks",
+      "EMPA (Swiss Federal Laboratories for Materials Science) WEEE PCB Fraction Characterization",
+      "European Union RoHS Directive (2011/65/EU & 2015/863 Annex II) & WEEE Directive (2012/19/EU)"
+    ],
+    "scientific_limitation_notice": "CRITICAL LIMITATION: Standard RGB 2D computer vision identifies visible exterior shapes and component packaging. It cannot perform chemical spectrometry, X-ray fluorescence (XRF), or mass spectrometry. The values provided below are statistical reference estimates derived from empirical laboratory disassembly studies of corresponding board classifications. They are decision-support estimates and MUST NOT be construed as certified laboratory measurements."
+  },
+  "board_categories": {
+    "motherboard": {
+      "display_name": "Computer / Server Motherboard",
+      "description": "Multi-layer high-density PCB with multiple chipset sockets, expansion slots, and extensive copper grounding planes.",
+      "has_sufficient_data": true,
+      "estimated_mass_range_grams": {
+        "min": 450,
+        "max": 750,
+        "typical": 580
+      },
+      "hazardous_content_percentage": {
+        "min": 2.2,
+        "max": 5.1,
+        "typical": 3.6,
+        "calculation_method": "mass_fraction_reference",
+        "regulatory_risk": "Moderate-High (WEEE Annex VII treatment mandatory)"
+      },
+      "hazardous_substances": [
+        {
+          "name": "Brominated Flame Retardants (BFRs / TBBPA)",
+          "typical_fraction_pct": 2.1,
+          "source_location": "FR-4 epoxy resin substrate & connector housing",
+          "hazard_profile": "Persistent organic pollutant potential; toxic dioxin/furan release during uncontrolled combustion"
+        },
+        {
+          "name": "Lead (Pb) Compounds",
+          "typical_fraction_pct": 1.1,
+          "source_location": "Solder joints (legacy non-RoHS boards) and internal IC packaging termination",
+          "hazard_profile": "Neurotoxic heavy metal; bioaccumulative in soil and aquatic runoff"
+        },
+        {
+          "name": "Beryllium (Be)",
+          "typical_fraction_pct": 0.03,
+          "source_location": "Beryllium-copper alloy in spring contact connectors and socket pins",
+          "hazard_profile": "Carcinogenic via particulate inhalation during mechanical shredding"
+        },
+        {
+          "name": "Capacitor Electrolytes",
+          "typical_fraction_pct": 0.35,
+          "source_location": "Electrolytic capacitor canisters (ethylene glycol, butyrolactone, boric acid)",
+          "hazard_profile": "Corrosive / irritant liquid; requires manual depollution prior to shredding"
+        }
+      ],
+      "valuable_fractions": {
+        "copper_pct": 18.5,
+        "aluminum_pct": 6.8,
+        "iron_steel_pct": 9.2,
+        "gold_ppm": 190,
+        "silver_ppm": 720,
+        "palladium_ppm": 45
+      },
+      "handling_recommendations": [
+        "Depollute large electrolytic capacitors and lithium coin cell batteries prior to shredding.",
+        "Desolder reusable processor sockets and memory interfaces using temperature-controlled hot air (max 245°C).",
+        "Send stripped FR-4 resin substrate to authorized pyrometallurgical copper smelter with acid-gas scrubbers."
+      ]
+    },
+    "graphics_card": {
+      "display_name": "Graphics Card (GPU / Video Board)",
+      "description": "High-density multi-layer board with large GPU die, GDDR high-speed VRAM, and high-current voltage regulator modules (VRMs).",
+      "has_sufficient_data": true,
+      "estimated_mass_range_grams": {
+        "min": 350,
+        "max": 950,
+        "typical": 520
+      },
+      "hazardous_content_percentage": {
+        "min": 1.9,
+        "max": 4.5,
+        "typical": 3.1,
+        "calculation_method": "mass_fraction_reference",
+        "regulatory_risk": "Moderate (WEEE Annex VII treatment required)"
+      },
+      "hazardous_substances": [
+        {
+          "name": "Brominated Flame Retardants (BFRs)",
+          "typical_fraction_pct": 1.8,
+          "source_location": "Multi-layer laminate and shroud plastics",
+          "hazard_profile": "Environmental persistence; halogenated hydrocarbon release"
+        },
+        {
+          "name": "Lead (Pb) & Trace Heavy Metals",
+          "typical_fraction_pct": 0.9,
+          "source_location": "Underfill solder balls (BGA) and legacy solder fillets",
+          "hazard_profile": "Heavy metal toxicity"
+        },
+        {
+          "name": "Electrolytic Solvents",
+          "typical_fraction_pct": 0.4,
+          "source_location": "Solid polymer and aluminum capacitors in power phases",
+          "hazard_profile": "Chemical irritant"
+        }
+      ],
+      "valuable_fractions": {
+        "copper_pct": 21.0,
+        "aluminum_pct": 18.0,
+        "iron_steel_pct": 4.5,
+        "gold_ppm": 140,
+        "silver_ppm": 550,
+        "palladium_ppm": 35
+      },
+      "handling_recommendations": [
+        "Disassemble aluminum/copper heatsink before component harvesting to maximize scrap purity.",
+        "Inspect high-value GDDR memory ICs and VRM MOSFETs for secondary repair demand.",
+        "Channel substrate to specialized e-waste precious metal refiners."
+      ]
+    },
+    "controller_board": {
+      "display_name": "Embedded Controller / IoT Board",
+      "description": "2-to-4 layer microcontroller board (e.g., appliance controller, router, automation gateway) with moderate component density.",
+      "has_sufficient_data": true,
+      "estimated_mass_range_grams": {
+        "min": 60,
+        "max": 220,
+        "typical": 120
+      },
+      "hazardous_content_percentage": {
+        "min": 1.4,
+        "max": 3.4,
+        "typical": 2.2,
+        "calculation_method": "mass_fraction_reference",
+        "regulatory_risk": "Low-Moderate (Generally RoHS compliant in modern models)"
+      },
+      "hazardous_substances": [
+        {
+          "name": "Flame Retardants (TBBPA)",
+          "typical_fraction_pct": 1.5,
+          "source_location": "Epoxy fiberglass substrate",
+          "hazard_profile": "Ecotoxic to aquatic life under landfill leaching"
+        },
+        {
+          "name": "Lead (Trace)",
+          "typical_fraction_pct": 0.5,
+          "source_location": "Older connector headers or uncertified solder",
+          "hazard_profile": "Heavy metal residue"
+        },
+        {
+          "name": "Capacitor Electrolyte",
+          "typical_fraction_pct": 0.2,
+          "source_location": "Filter capacitors",
+          "hazard_profile": "Mild chemical irritant"
+        }
+      ],
+      "valuable_fractions": {
+        "copper_pct": 14.5,
+        "aluminum_pct": 2.0,
+        "iron_steel_pct": 5.0,
+        "gold_ppm": 85,
+        "silver_ppm": 320,
+        "palladium_ppm": 15
+      },
+      "handling_recommendations": [
+        "High percentage of reusable MCUs and I/O headers; prioritize desoldering for maker education.",
+        "Check EEPROM/Flash chips for configuration wipe before reuse.",
+        "Sort remaining FR-4 board into general electronic scrap stream."
+      ]
+    },
+    "power_supply_board": {
+      "display_name": "Power Supply Board (SMPS / Inverter)",
+      "description": "Single or double-sided board with heavy iron-core transformers, large high-voltage filter capacitors, and power semiconductors.",
+      "has_sufficient_data": true,
+      "estimated_mass_range_grams": {
+        "min": 250,
+        "max": 800,
+        "typical": 480
+      },
+      "hazardous_content_percentage": {
+        "min": 3.2,
+        "max": 7.4,
+        "typical": 4.9,
+        "calculation_method": "mass_fraction_reference",
+        "regulatory_risk": "High (Contains large electrolytic fluid volume & heavy solder)"
+      },
+      "hazardous_substances": [
+        {
+          "name": "Electrolytic Fluid / Solvents",
+          "typical_fraction_pct": 2.6,
+          "source_location": "Bulk 400V/450V primary smoothing electrolytic capacitors",
+          "hazard_profile": "High volume of organic solvent / acid electrolyte; leak and fire hazard"
+        },
+        {
+          "name": "Brominated Flame Retardants & Varnishes",
+          "typical_fraction_pct": 1.4,
+          "source_location": "Substrate and potting resins / transformer insulating tape",
+          "hazard_profile": "Halogenated emissions when heated"
+        },
+        {
+          "name": "Lead / Heavy Solder",
+          "typical_fraction_pct": 0.9,
+          "source_location": "Through-hole wave solder baths with thicker alloy fillets",
+          "hazard_profile": "Cumulative toxicant"
+        }
+      ],
+      "valuable_fractions": {
+        "copper_pct": 12.0,
+        "aluminum_pct": 15.0,
+        "iron_steel_pct": 24.0,
+        "gold_ppm": 15,
+        "silver_ppm": 80,
+        "palladium_ppm": 5
+      },
+      "handling_recommendations": [
+        "SAFETY MANDATE: Ensure all primary high-voltage capacitors (>100V) are safely discharged with a resistor load before physical contact.",
+        "Recover aluminum heatsinks and copper transformer windings mechanically.",
+        "Depollute large capacitors as separate hazardous waste stream under WEEE guidelines."
+      ]
+    },
+    "unknown": {
+      "display_name": "Unspecified / Generic Electronic Board",
+      "description": "Unclassified electronic circuit board without verified operating domain or mass reference.",
+      "has_sufficient_data": false,
+      "hazardous_content_percentage": null,
+      "reason_insufficient": "Optical RGB photographs alone cannot determine alloy thickness, substrate laminate composition, or internal hazardous chemical mass fraction without board category classification or physical weight measurement.",
+      "required_tests": [
+        "Handheld X-Ray Fluorescence (XRF) spectrometry for heavy metal detection (Pb, Cd, Hg, Cr-VI, Br)",
+        "Board classification selection (Motherboard, GPU, Controller, Power Supply)",
+        "Gravimetric scale weighing (grams) to calculate mass fraction percentage"
+      ],
+      "regulatory_risk": "Indeterminate - Default to precautionary hazardous e-waste containment"
+    }
+  }
+}

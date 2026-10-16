@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}Turn Electronic Waste into Recoverable Value{% endblock %}
+{% block page_breadcrumb %}Overview{% endblock %}
+
+{% block content %}
+<!-- Hackathon Model Mode Notice Banner -->
+{% if model_status.is_demo %}
+<div class="alert-banner alert-demo">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+  </svg>
+  <div>
+    <strong>Hackathon Demonstration Mode Active:</strong> Custom trained weights (<code>models/best.pt</code>) have not yet been placed in the models directory. 
+    CircuitSense AI is utilizing an intelligent OpenCV edge/contour localization engine to demonstrate the complete full-stack inference, valuation, and reporting workflow. 
+    All generated results are honestly labeled as simulated. <a href="{{ url_for('about') }}" style="text-decoration: underline; color: #FFF; font-weight: 600;">Learn how to connect a trained YOLO model &rarr;</a>
+  </div>
+</div>
+{% endif %}
+
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="hero-content">
+    <div class="hero-tag">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/>
+      </svg>
+      Computer Vision E-Waste Recovery Engine
+    </div>
+
+    <h1 class="hero-title">
+      Turn Electronic Waste into <span class="gradient-text">Recoverable Value</span>
+    </h1>
+
+    <p class="hero-description">
+      Manual sorting of discarded circuit boards is hazardous, tedious, and inefficient. 
+      CircuitSense AI leverages computer vision to automatically detect, classify, and inventory 
+      reusable ICs, microcontrollers, capacitors, and connectors—delivering transparent valuations and 
+      scientifically defensible material analysis.
+    </p>
+
+    <div class="hero-cta">
+      <a href="{{ url_for('analyze') }}" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        Analyze Circuit Board
+      </a>
+
+      <a href="#features" class="btn btn-secondary">
+        Explore Features
+      </a>
+    </div>
+
+    <!-- Live Metrics Aggregated from SQLite -->
+    <div class="hero-stats">
+      <div class="stat-item">
+        <h3>{{ total_analyzed }}</h3>
+        <p>Boards Analyzed</p>
+      </div>
+      <div class="stat-item">
+        <h3>{{ total_components_recovered }}</h3>
+        <p>Components Mapped</p>
+      </div>
+      <div class="stat-item">
+        <h3>₹{{ total_value_identified }}</h3>
+        <p>Estimated Recovery Value</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero Visual PCB Graphic with Animated Optical Boxes -->
+  <div class="hero-visual-card">
+    <div class="hero-pcb-mockup">
+      <div class="circuit-grid-overlay"></div>
+      
+      <!-- Simulated Optical Detection Bounding Boxes -->
+      <div class="simulated-box sim-box-ic">
+        <span class="sim-label" style="border: 1px solid var(--cls-ic); color: var(--cls-ic);">IC 94%</span>
+        <span style="font-size: 0.6rem; color: #FFF; font-weight: 600;">Logic Gate SMD</span>
+      </div>
+
+      <div class="simulated-box sim-box-mcu">
+        <span class="sim-label" style="border: 1px solid var(--cls-mcu); color: var(--cls-mcu);">MCU 91%</span>
+        <span style="font-size: 0.6rem; color: #FFF; font-weight: 600;">32-Bit ARM SoC</span>
+      </div>
+
+      <div class="simulated-box sim-box-cap">
+        <span class="sim-label" style="border: 1px solid var(--cls-cap); color: var(--cls-cap);">CAP 88%</span>
+        <span style="font-size: 0.6rem; color: #FFF; font-weight: 600;">Electrolytic 470uF</span>
+      </div>
+
+      <!-- Center HUD Indicator -->
+      <div style="position: absolute; bottom: 16px; right: 16px; background: rgba(23, 25, 29, 0.85); padding: 6px 14px; border-radius: var(--border-radius-pill); border: var(--glass-border); font-size: 0.72rem; color: var(--text-secondary); backdrop-filter: blur(12px);">
+        <span style="color: var(--accent-primary); font-weight: 700;">● LIVE CV PIPELINE:</span> YOLOv8 Optical Feature Engine
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Feature Cards Section -->
+<section id="features" style="padding-top: 20px;">
+  <div class="section-header">
+    <h2>Autonomous E-Waste Analysis Pipeline</h2>
+    <p>Engineered for high-throughput circuit board sorting, reclamation, and environmental safety.</p>
+  </div>
+
+  <div class="features-grid">
+    <!-- Feature 1: Object Detection -->
+    <div class="glass-card feature-card glass-card-hover">
+      <div class="feature-icon-wrapper cyan">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/>
+          <line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/>
+        </svg>
+      </div>
+      <h3>YOLOv8 Component Detection</h3>
+      <p>Localizes and bounds Integrated Circuits, Microcontrollers, Capacitors, and Connectors with millisecond latency and configurable confidence thresholds.</p>
+    </div>
+
+    <!-- Feature 2: Structured Inventory -->
+    <div class="glass-card feature-card glass-card-hover">
+      <div class="feature-icon-wrapper blue">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          <line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
+        </svg>
+      </div>
+      <h3>Structured Digital Inventory</h3>
+      <p>Automatically aggregates detected component counts, unique class distributions, and high-confidence individual crops for visual verification.</p>
+    </div>
+
+    <!-- Feature 3: Secondary Market Valuation -->
+    <div class="glass-card feature-card glass-card-hover">
+      <div class="feature-icon-wrapper green">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="1" x2="12" y2="23"/>
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+      </div>
+      <h3>Second-Hand Market Valuation</h3>
+      <p>Calculates transparent wholesale recovery estimates in INR across low, high, and midpoint bands with adjustable board condition coefficients.</p>
+    </div>
+
+    <!-- Feature 4: Material Analysis -->
+    <div class="glass-card feature-card glass-card-hover">
+      <div class="feature-icon-wrapper amber">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <h3>Scientific Material Analysis</h3>
+      <p>Differentiates empirical reference-based hazard fractions (Mode A) from insufficient data warnings (Mode B) without fabricating chemical metrics.</p>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works Workflow Timeline -->
+<section class="workflow-section">
+  <div class="section-header">
+    <h2>How CircuitSense Operates</h2>
+    <p>A rigorous 4-step pipeline designed for speed, scientific integrity, and actionable recycling guidance.</p>
+  </div>
+
+  <div class="workflow-steps">
+    <div class="glass-card step-card">
+      <div class="step-number">1</div>
+      <h4>Image Ingestion</h4>
+      <p style="font-size: 0.85rem; color: var(--text-secondary);">Upload circuit board photo (JPG/PNG). System verifies format, sanitizes headers, and corrects orientation.</p>
+    </div>
+
+    <div class="glass-card step-card">
+      <div class="step-number">2</div>
+      <h4>Computer Vision</h4>
+      <p style="font-size: 0.85rem; color: var(--text-secondary);">Ultralytics YOLOv8 extracts spatial bounding boxes, class categories, and confidence scores across the PCB.</p>
+    </div>
+
+    <div class="glass-card step-card">
+      <div class="step-number">3</div>
+      <h4>Multi-Factor Analytics</h4>
+      <p style="font-size: 0.85rem; color: var(--text-secondary);">Calculates salvage market valuations, assesses WEEE/RoHS hazard risks, and isolates zoomed component crops.</p>
+    </div>
+
+    <div class="glass-card step-card">
+      <div class="step-number">4</div>
+      <h4>Audit Report & Action</h4>
+      <p style="font-size: 0.85rem; color: var(--text-secondary);">Inspect interactive visual layers, filter confidence, export CSV inventory, or download publication PDF reports.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Recent Analyses Section (if available) -->
+{% if recent_analyses %}
+<section style="margin-top: 60px;">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+    <div>
+      <h2 style="font-size: 1.5rem; font-weight: 700;">Recent Circuit Analyses</h2>
+      <p style="color: var(--text-secondary); font-size: 0.9rem;">Review recent PCB inspection runs stored in local history.</p>
+    </div>
+    <a href="{{ url_for('history') }}" class="btn btn-outline btn-sm">View All History &rarr;</a>
+  </div>
+
+  <div class="history-grid">
+    {% for item in recent_analyses %}
+    <div class="glass-card history-card glass-card-hover">
+      <img src="{{ url_for('serve_output', filename=item.annotated_filename) }}" alt="Analyzed Circuit Board" class="history-thumb" onerror="this.src='{{ url_for('serve_upload', filename=item.stored_filename) }}'">
+      
+      <div class="history-card-body">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <span class="badge {% if item.is_demo %}badge-amber{% else %}badge-green{% endif %}">
+            {% if item.is_demo %}Demo Mode{% else %}Verified YOLO{% endif %}
+          </span>
+          <small style="color: var(--text-muted); font-size: 0.75rem;">{{ item.created_at }}</small>
+        </div>
+        <h4 style="font-size: 1rem; color: #FFF; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          {{ item.original_filename }}
+        </h4>
+        <p style="font-size: 0.82rem; color: var(--text-secondary);">
+          <strong>{{ item.total_components }}</strong> components detected across <strong>{{ item.unique_classes }}</strong> classes.
+        </p>
+        <p style="font-size: 0.88rem; color: var(--accent-primary); font-weight: 700;">
+          Est. Value: ₹{{ item.val_total_mid }}
+        </p>
+      </div>
+
+      <div class="history-card-footer">
+        <a href="{{ url_for('results', analysis_id=item.analysis_id) }}" class="btn btn-secondary btn-sm" style="flex: 1;">
+          Inspect Results
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Scientific Disclaimer Section -->
+<section style="margin-top: 60px;">
+  <div class="glass-panel" style="border-left: 3px solid var(--accent-primary); background: rgba(32, 36, 43, 0.45);">
+    <h4 style="color: #FFF; font-size: 0.95rem; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+      </svg>
+      Operational Scope & Scientific Disclaimer
+    </h4>
+    <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+      CircuitSense AI is developed for academic research, engineering hackathon demonstration, and operational decision support. 
+      Automated object detections indicate physical component presence and package form factor. They do not constitute guaranteed functional integrity, 
+      counterfeit verification, or certified resale value. Chemical hazardous material percentages are derived from published peer-reviewed reference fractions 
+      and empirical dismantling studies (EMPA / UNEP) and must not be used as substitutes for non-destructive X-ray Fluorescence (XRF) spectrometry or destructive chemical assays.
+    </p>
+  </div>
+</section>
+{% endblock %}

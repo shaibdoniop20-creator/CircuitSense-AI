@@ -1,0 +1,170 @@
+{
+  "catalogue_metadata": {
+    "version": "1.2.0",
+    "currency": "INR",
+    "currency_symbol": "₹",
+    "last_updated": "2026-03-15",
+    "primary_source": "Secondary Electronics Resale Market Index & E-Waste Component Scrap Survey (Illustrative Demonstration Data)",
+    "general_disclaimer": "All estimates are illustrative indicators based on visual form factor. Real resale pricing is subject to pin integrity, functional bench testing, silicon verification, and current industrial procurement demand."
+  },
+  "categories": {
+    "integrated_circuit": {
+      "display_name": "Integrated Circuit (IC)",
+      "default_subtype": "generic_ic",
+      "subtypes": {
+        "generic_ic": {
+          "name": "Generic SMD / DIP IC",
+          "min_price_inr": 15.0,
+          "max_price_inr": 65.0,
+          "source": "Secondary Electronics Resale Market Index",
+          "condition_assumptions": "Unsolderable package, pins straight and unoxidized, no surface cratering",
+          "reliability_note": "Visual optical detection cannot verify silicon logic or ROM contents without test jig"
+        },
+        "logic_ic": {
+          "name": "Digital Logic / Gate IC (74xx / 40xx series)",
+          "min_price_inr": 20.0,
+          "max_price_inr": 85.0,
+          "source": "Electronics Hobbyist & Repair Depot Quotations",
+          "condition_assumptions": "Standard SOIC/DIP package with legible part marking",
+          "reliability_note": "Commonly recovered for repair work and educational maker kits"
+        },
+        "power_management_ic": {
+          "name": "Power Management IC (PMIC / Buck-Boost Controller)",
+          "min_price_inr": 35.0,
+          "max_price_inr": 120.0,
+          "source": "Appliance & PC Motherboard Repair Workshop Survey",
+          "condition_assumptions": "Thermal pad unseparated, no burn marks around VCC pins",
+          "reliability_note": "High demand in board repair shops if intact"
+        },
+        "eeprom_memory_ic": {
+          "name": "Flash / EEPROM / Serial Memory IC",
+          "min_price_inr": 25.0,
+          "max_price_inr": 95.0,
+          "source": "Secondary Hardware Refurbishment Index",
+          "condition_assumptions": "SPI/I2C package undamaged, reprogrammable",
+          "reliability_note": "Requires flashing and memory verification before reuse"
+        }
+      }
+    },
+    "microcontroller": {
+      "display_name": "Microcontroller (MCU)",
+      "default_subtype": "generic_microcontroller",
+      "subtypes": {
+        "generic_microcontroller": {
+          "name": "Generic Microcontroller / Embedded SoC",
+          "min_price_inr": 80.0,
+          "max_price_inr": 350.0,
+          "source": "Secondary Component Broker Benchmarks",
+          "condition_assumptions": "Pins or QFN/BGA ball array intact, no silicon package crack",
+          "reliability_note": "Resale requires firmware clearance and pin continuity test"
+        },
+        "arm_cortex_mcu": {
+          "name": "32-bit ARM Cortex / RISC-V MCU",
+          "min_price_inr": 150.0,
+          "max_price_inr": 550.0,
+          "source": "Secondary Component Broker Benchmarks",
+          "condition_assumptions": "LQFP/QFN package intact, clean pads",
+          "reliability_note": "Premium value in IoT prototyping and embedded repair markets"
+        },
+        "8bit_mcu": {
+          "name": "8-bit Microcontroller (AVR / PIC / 8051 compatible)",
+          "min_price_inr": 40.0,
+          "max_price_inr": 180.0,
+          "source": "Educational & Maker Electronic Inventory Catalogues",
+          "condition_assumptions": "Standard package, intact leads",
+          "reliability_note": "Consistent utility in domestic consumer appliance controllers"
+        }
+      }
+    },
+    "transistor": {
+      "display_name": "Transistor / MOSFET",
+      "default_subtype": "small_signal_transistor",
+      "subtypes": {
+        "small_signal_transistor": {
+          "name": "Small Signal BJT / Switching Transistor (TO-92 / SOT-23)",
+          "min_price_inr": 4.0,
+          "max_price_inr": 18.0,
+          "source": "Secondary Electronics Resale Market Index",
+          "condition_assumptions": "Three leads intact, no thermal discoloration on casing",
+          "reliability_note": "Easily tested with multimeter diode function for junction gain"
+        },
+        "power_mosfet_transistor": {
+          "name": "Power MOSFET / IGBT (TO-220 / DPAK)",
+          "min_price_inr": 20.0,
+          "max_price_inr": 85.0,
+          "source": "Power Supply & Inverter Repair Benchmarks",
+          "condition_assumptions": "Metal tab undamaged, gate-source oxide intact",
+          "reliability_note": "High secondary recovery value in SMPS and motor driver repairs"
+        },
+        "power_bjt_transistor": {
+          "name": "Medium/High Power Bipolar Transistor (TO-126 / TO-220)",
+          "min_price_inr": 12.0,
+          "max_price_inr": 50.0,
+          "source": "Audio & Industrial Equipment Refurbishment Index",
+          "condition_assumptions": "Pins straight, non-shorted junctions",
+          "reliability_note": "Commonly harvested for audio amplifier repairs"
+        }
+      }
+    },
+    "capacitor": {
+      "display_name": "Capacitor",
+      "default_subtype": "electrolytic_capacitor",
+      "subtypes": {
+        "electrolytic_capacitor": {
+          "name": "Radial Aluminum Electrolytic Capacitor",
+          "min_price_inr": 3.0,
+          "max_price_inr": 15.0,
+          "source": "Salvage Component Scrap & Reconditioning Estimates",
+          "condition_assumptions": "Top vent flat (not bulged), rubber bung seated, no electrolyte leak",
+          "reliability_note": "Subject to ESR and capacitance degradation over operating lifespan"
+        },
+        "tantalum_capacitor": {
+          "name": "Solid Tantalum SMD Capacitor",
+          "min_price_inr": 8.0,
+          "max_price_inr": 35.0,
+          "source": "Precious / Rare Metal Reclamation & Component Exchange",
+          "condition_assumptions": "No dielectric breakdown or scorching",
+          "reliability_note": "Contains critical tantalum metal; high secondary demand"
+        },
+        "ceramic_smd_capacitor": {
+          "name": "Multi-layer Ceramic SMD Capacitor (MLCC)",
+          "min_price_inr": 1.0,
+          "max_price_inr": 6.0,
+          "source": "Bulk PCB Component Reclaim Index",
+          "condition_assumptions": "Terminations unbroken, ceramic body unchipped",
+          "reliability_note": "Usually harvested in bulk rather than individual sales"
+        }
+      }
+    },
+    "connector": {
+      "display_name": "Connector / Port",
+      "default_subtype": "generic_connector",
+      "subtypes": {
+        "generic_connector": {
+          "name": "Generic Pin Header / Board-to-Board Connector",
+          "min_price_inr": 5.0,
+          "max_price_inr": 25.0,
+          "source": "Electronics Surplus & Hardware Reclaim Index",
+          "condition_assumptions": "Plastic housing unmelted, pins straight, contact plating intact",
+          "reliability_note": "Mechanical durability readily verifiable by visual inspection"
+        },
+        "usb_hdmi_interface": {
+          "name": "External I/O Jack (USB-A/C, HDMI, RJ-45 Ethernet)",
+          "min_price_inr": 15.0,
+          "max_price_inr": 60.0,
+          "source": "Repair Workshop Connector Supply Data",
+          "condition_assumptions": "Shielding unbent, interior plastic tongue unbroken, solder lugs clean",
+          "reliability_note": "High utility for consumer electronics repair"
+        },
+        "terminal_block_header": {
+          "name": "Screw Terminal / Power Jack / Heavy Molex Header",
+          "min_price_inr": 10.0,
+          "max_price_inr": 40.0,
+          "source": "Industrial Surplus Hardware Benchmarks",
+          "condition_assumptions": "Screws threaded, housing crack-free",
+          "reliability_note": "Very durable; highly reusable in DIY power projects"
+        }
+      }
+    }
+  }
+}

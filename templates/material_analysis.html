@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Material Analysis & Chemical Standards{% endblock %}
+{% block page_breadcrumb %}Material Analysis Methodology{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 28px;">
+  <h1 style="font-size: 2.2rem; font-weight: 700; letter-spacing: -0.6px; color: #FFFFFF;">
+    E-Waste Material Analysis Methodology
+  </h1>
+  <p style="color: var(--text-secondary); font-size: 1rem; margin-top: 6px;">
+    Empirical hazardous substance mass fraction models, precious metal recovery benchmarks, and RoHS/WEEE compliance guidelines.
+  </p>
+</div>
+
+<!-- Scientific Limitation Callout Banner -->
+<div class="alert-banner alert-demo" style="margin-bottom: 32px;">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+  </svg>
+  <div>
+    <strong>Essential Scientific Limitation:</strong>
+    Standard 2D optical RGB photography cannot directly measure chemical concentrations or detect molecular bonds. 
+    CircuitSense AI enforces a strict dual-mode protocol: 
+    <strong>Mode A (Reference-Based Estimation)</strong> when board category is known, and 
+    <strong>Mode B (Insufficient Data Disclosure)</strong> when classification is indeterminate. 
+    We never fabricate chemical composition or claim optical detection equals laboratory spectrometry.
+  </div>
+</div>
+
+<!-- Mode A vs Mode B Architecture Comparison Cards -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 36px;">
+  <div class="glass-card">
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+      <span class="badge badge-green">MODE A</span>
+      <h3 style="font-size: 1.15rem; color: #FFF;">Reference-Based Estimation</h3>
+    </div>
+    <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
+      Activated when the board type is categorized (e.g. Motherboard, GPU, Controller, Power Supply). Applies empirical mass fraction data from UNEP and EMPA laboratory disassembly studies.
+    </p>
+    <div style="padding: 12px; background: rgba(255, 255, 255, 0.02); border-radius: var(--border-radius-sm); border: var(--glass-border); font-size: 0.82rem; color: var(--accent-primary);">
+      Formula: <code>Hazardous Mass % = (Estimated Hazardous Mass / Total Board Mass) &times; 100</code>
+    </div>
+  </div>
+
+  <div class="glass-card">
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+      <span class="badge badge-amber">MODE B</span>
+      <h3 style="font-size: 1.15rem; color: #FFF;">Insufficient Data Protocol</h3>
+    </div>
+    <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
+      Activated for unclassified, damaged, or unknown boards. The system transparently withholds percentage fabrication, declaring that RGB imagery alone cannot determine chemical composition without spectrometry.
+    </p>
+    <div style="padding: 12px; background: rgba(255, 255, 255, 0.02); border-radius: var(--border-radius-sm); border: var(--glass-border); font-size: 0.82rem; color: var(--color-warning);">
+      Action Required: Handheld XRF Spectrometry & Gravimetric Scale Weighing
+    </div>
+  </div>
+</div>
+
+<!-- Empirical Reference Benchmarks by Board Category -->
+<h2 style="font-size: 1.6rem; font-weight: 700; color: #FFFFFF; margin-bottom: 20px;">
+  Board Category Chemical Benchmarks
+</h2>
+
+<div style="display: flex; flex-direction: column; gap: 24px; margin-bottom: 40px;">
+  {% for cat_key, cat in board_categories.items() %}
+  <div class="glass-card">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; border-bottom: var(--glass-border); padding-bottom: 12px;">
+      <div>
+        <h3 style="font-size: 1.25rem; font-weight: 600; color: #FFFFFF;">{{ cat.display_name }}</h3>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;">{{ cat.description }}</p>
+      </div>
+      <span class="badge {% if cat.has_sufficient_data %}badge-cyan{% else %}badge-amber{% endif %}">
+        {% if cat.has_sufficient_data %}Sufficient Reference Data{% else %}Mode B Trigger{% endif %}
+      </span>
+    </div>
+
+    {% if cat.has_sufficient_data %}
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 18px;">
+      <div style="padding: 12px 14px; background: rgba(255, 255, 255, 0.02); border-radius: var(--border-radius-sm); border: var(--glass-border);">
+        <small style="color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; font-weight: 600;">Hazardous Mass Fraction</small>
+        <div style="font-size: 1.2rem; font-weight: 700; color: var(--color-warning); margin-top: 2px;">
+          {{ cat.hazardous_content_percentage.min }}% - {{ cat.hazardous_content_percentage.max }}%
+        </div>
+        <small style="color: var(--text-muted); font-size: 0.72rem;">Typical: {{ cat.hazardous_content_percentage.typical }}%</small>
+      </div>
+
+      <div style="padding: 12px 14px; background: rgba(255, 255, 255, 0.02); border-radius: var(--border-radius-sm); border: var(--glass-border);">
+        <small style="color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; font-weight: 600;">Typical Board Mass</small>
+        <div style="font-size: 1.2rem; font-weight: 700; color: #FFF; margin-top: 2px;">
+          {{ cat.estimated_mass_range_grams.typical }} grams
+        </div>
+        <small style="color: var(--text-muted); font-size: 0.72rem;">Range: {{ cat.estimated_mass_range_grams.min }}g - {{ cat.estimated_mass_range_grams.max }}g</small>
+      </div>
+
+      <div style="padding: 12px 14px; background: rgba(255, 255, 255, 0.02); border-radius: var(--border-radius-sm); border: var(--glass-border);">
+        <small style="color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; font-weight: 600;">Regulatory Classification</small>
+        <div style="font-size: 0.95rem; font-weight: 600; color: var(--text-main); margin-top: 4px;">
+          {{ cat.hazardous_content_percentage.regulatory_risk }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Valuable Metal Fractions -->
+    <h5 style="font-size: 0.85rem; color: var(--accent-primary); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">
+      Valuable Reclamation Fractions
+    </h5>
+    <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 16px;">
+      <span class="badge badge-blue">Copper: {{ cat.valuable_fractions.copper_pct }}%</span>
+      <span class="badge badge-blue">Gold (Au): {{ cat.valuable_fractions.gold_ppm }} ppm</span>
+      <span class="badge badge-blue">Silver (Ag): {{ cat.valuable_fractions.silver_ppm }} ppm</span>
+      <span class="badge badge-blue">Palladium (Pd): {{ cat.valuable_fractions.palladium_ppm }} ppm</span>
+    </div>
+
+    <!-- Hazardous Substances Breakdown -->
+    <h5 style="font-size: 0.85rem; color: var(--color-warning); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">
+      Hazardous Substances Present
+    </h5>
+    <div class="substance-list">
+      {% for sub in cat.hazardous_substances %}
+      <div class="substance-card">
+        <div class="substance-header">
+          <h5>{{ sub.name }}</h5>
+          <span style="font-size: 0.75rem; color: var(--color-warning); font-weight: 600;">~{{ sub.typical_fraction_pct }}% by weight</span>
+        </div>
+        <p>{{ sub.hazard_profile }}</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 12px;">
+      {{ cat.reason_insufficient }}
+    </p>
+    <div style="font-size: 0.82rem; color: var(--text-muted);">
+      <strong>Required Steps:</strong>
+      <ul style="padding-left: 20px; margin-top: 6px; line-height: 1.5;">
+        {% for test in cat.required_tests %}
+        <li>{{ test }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Literature Sources -->
+<div class="glass-panel">
+  <h4 style="color: #FFF; font-size: 0.95rem; margin-bottom: 8px;">Literature & Regulatory References:</h4>
+  <ul style="padding-left: 20px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.6;">
+    {% for src in reference_metadata.sources %}
+    <li>{{ src }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

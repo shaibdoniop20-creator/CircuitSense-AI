@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Component Inventory & Valuation Catalogue{% endblock %}
+{% block page_breadcrumb %}Component Inventory{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 28px;">
+  <h1 style="font-size: 2.2rem; font-weight: 700; letter-spacing: -0.6px; color: #FFFFFF;">
+    Component Inventory & Salvage Catalogue
+  </h1>
+  <p style="color: var(--text-secondary); font-size: 1rem; margin-top: 6px;">
+    Cumulative detection distribution across all analyzed printed circuit boards and verified secondary market recovery price benchmarks.
+  </p>
+</div>
+
+<!-- Cumulative Metrics & Distribution Chart -->
+<div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 28px; margin-bottom: 36px;">
+  <!-- Cumulative Counts Grid -->
+  <div class="glass-card">
+    <h3 style="font-size: 1.15rem; font-weight: 600; color: #FFFFFF; margin-bottom: 18px;">
+      Cumulative Component Distribution
+    </h3>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+      <div style="padding: 16px; background: rgba(0, 242, 254, 0.08); border-radius: var(--border-radius-md); border: 1px solid rgba(0, 242, 254, 0.35); box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2);">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+          <span class="legend-color-dot" style="background: var(--cls-ic);"></span>
+          <span style="font-size: 0.82rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Integrated Circuits</span>
+        </div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: #FFF;">{{ aggregate_counts.integrated_circuit or 0 }}</div>
+      </div>
+
+      <div style="padding: 16px; background: rgba(79, 172, 254, 0.08); border-radius: var(--border-radius-md); border: 1px solid rgba(79, 172, 254, 0.35); box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2);">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+          <span class="legend-color-dot" style="background: var(--cls-mcu);"></span>
+          <span style="font-size: 0.82rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Microcontrollers</span>
+        </div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: #FFF;">{{ aggregate_counts.microcontroller or 0 }}</div>
+      </div>
+
+      <div style="padding: 16px; background: rgba(179, 136, 255, 0.08); border-radius: var(--border-radius-md); border: 1px solid rgba(179, 136, 255, 0.35); box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2);">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+          <span class="legend-color-dot" style="background: var(--cls-transistor);"></span>
+          <span style="font-size: 0.82rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Transistors</span>
+        </div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: #FFF;">{{ aggregate_counts.transistor or 0 }}</div>
+      </div>
+
+      <div style="padding: 16px; background: rgba(0, 230, 118, 0.08); border-radius: var(--border-radius-md); border: 1px solid rgba(0, 230, 118, 0.35); box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2);">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+          <span class="legend-color-dot" style="background: var(--cls-cap);"></span>
+          <span style="font-size: 0.82rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Capacitors</span>
+        </div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: #FFF;">{{ aggregate_counts.capacitor or 0 }}</div>
+      </div>
+
+      <div style="padding: 16px; background: rgba(255, 179, 0, 0.08); border-radius: var(--border-radius-md); border: 1px solid rgba(255, 179, 0, 0.35); box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2);">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+          <span class="legend-color-dot" style="background: var(--cls-conn);"></span>
+          <span style="font-size: 0.82rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Connectors / Ports</span>
+        </div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: #FFF;">{{ aggregate_counts.connector or 0 }}</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 18px; padding-top: 14px; border-top: var(--glass-border); display: flex; justify-content: space-between; align-items: center;">
+      <span style="font-size: 0.9rem; color: var(--text-secondary);">Total Recorded Detections:</span>
+      <strong style="font-size: 1.2rem; color: var(--accent-primary);">{{ total_detected_all }} Units</strong>
+    </div>
+  </div>
+
+  <!-- Chart.js Donut Chart Card -->
+  <div class="glass-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <h3 style="font-size: 1.1rem; font-weight: 600; color: #FFFFFF; margin-bottom: 12px; width: 100%;">
+      Class Distribution Ratio
+    </h3>
+    <div style="position: relative; width: 220px; height: 220px;">
+      <canvas id="inventoryChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Section 2: Component Pricing & Valuation Catalogue -->
+<section id="valuation">
+  <div style="margin-bottom: 20px;">
+    <h2 style="font-size: 1.6rem; font-weight: 700; color: #FFFFFF;">
+      Secondary Market Component Valuation Catalogue (INR)
+    </h2>
+    <p style="color: var(--text-secondary); font-size: 0.92rem;">
+      Transparent baseline price brackets utilized by the valuation engine. All prices are explicitly labeled as illustrative salvage depot estimates.
+    </p>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 24px;">
+    {% for cat_key, cat in pricing_data.items() %}
+    <div class="glass-card">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; border-bottom: var(--glass-border); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="legend-color-dot" style="background: {% if cat_key == 'integrated_circuit' %}var(--cls-ic){% elif cat_key == 'microcontroller' %}var(--cls-mcu){% elif cat_key == 'transistor' %}var(--cls-transistor){% elif cat_key == 'capacitor' %}var(--cls-cap){% else %}var(--cls-conn){% endif %}; width: 12px; height: 12px;"></span>
+          <h3 style="font-size: 1.2rem; font-weight: 600; color: #FFFFFF;">{{ cat.display_name }}</h3>
+        </div>
+        <span class="badge badge-cyan">{{ cat.subtypes|length }} Subtypes Benchmarked</span>
+      </div>
+
+      <div class="data-table-wrap">
+        <table class="glass-table">
+          <thead>
+            <tr>
+              <th>Subtype Name</th>
+              <th>Unit Range (INR)</th>
+              <th>Benchmark Source</th>
+              <th>Condition Preconditions</th>
+              <th>Reliability Disclosure</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sub_key, sub in cat.subtypes.items() %}
+            <tr>
+              <td>
+                <strong>{{ sub.name }}</strong>
+                {% if sub_key == cat.default_subtype %}
+                <span class="badge badge-blue" style="font-size: 0.65rem; margin-left: 6px;">Default</span>
+                {% endif %}
+              </td>
+              <td style="color: var(--color-success); font-weight: 700;">
+                ₹{{ sub.min_price_inr }} - ₹{{ sub.max_price_inr }}
+              </td>
+              <td style="font-size: 0.8rem; color: var(--text-secondary);">
+                {{ sub.source }}
+              </td>
+              <td style="font-size: 0.8rem; color: var(--text-muted);">
+                {{ sub.condition_assumptions }}
+              </td>
+              <td style="font-size: 0.8rem; color: var(--text-muted);">
+                {{ sub.reliability_note }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Render Chart.js Donut
+  document.addEventListener("DOMContentLoaded", function() {
+    const ctx = document.getElementById("inventoryChart");
+    if (!ctx) return;
+
+    const counts = [
+      {{ aggregate_counts.integrated_circuit or 0 }},
+      {{ aggregate_counts.microcontroller or 0 }},
+      {{ aggregate_counts.transistor or 0 }},
+      {{ aggregate_counts.capacitor or 0 }},
+      {{ aggregate_counts.connector or 0 }}
+    ];
+
+    const total = counts.reduce((a, b) => a + b, 0);
+
+    new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: ["ICs", "MCUs", "Transistors", "Capacitors", "Connectors"],
+        datasets: [{
+          data: total > 0 ? counts : [1, 1, 1, 1, 1],
+          backgroundColor: ["#00F2FE", "#4FACFE", "#B388FF", "#00E676", "#FFB300"],
+          borderWidth: 0,
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return ` ${context.label}: ${context.raw} units`;
+              }
+            }
+          }
+        },
+        cutout: "74%"
+      }
+    });
+  });
+</script>
+{% endblock %}

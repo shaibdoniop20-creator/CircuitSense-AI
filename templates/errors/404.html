@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}404 - Circuit Not Found{% endblock %}
+{% block page_breadcrumb %}404 Error{% endblock %}
+
+{% block content %}
+<div class="glass-card" style="text-align: center; padding: 60px 24px; max-width: 580px; margin: 40px auto;">
+  <div style="font-size: 4rem; font-weight: 800; color: var(--accent-primary); letter-spacing: -2px;">404</div>
+  <h2 style="color: #FFF; font-size: 1.5rem; margin-bottom: 8px;">Circuit Resource Not Located</h2>
+  <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin-bottom: 24px;">
+    The requested circuit board analysis, image, or route does not exist or may have been deleted.
+  </p>
+  <div style="display: flex; gap: 12px; justify-content: center;">
+    <a href="{{ url_for('index') }}" class="btn btn-primary btn-sm">Return to Overview</a>
+    <a href="{{ url_for('analyze') }}" class="btn btn-secondary btn-sm">New Analysis</a>
+  </div>
+</div>
+{% endblock %}

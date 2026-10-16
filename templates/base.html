@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}CircuitSense AI{% endblock %} | Intelligent E-Waste Circuit Component Classifier & Material Analyzer</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/logo.svg') }}">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  
+  <!-- Chart.js CDN for Analytics Visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <!-- Ambient Liquid Caustic Light Orbs for Pure Black Glass Refraction -->
+  <div class="liquid-bg-orbs" aria-hidden="true">
+    <div class="liquid-orb orb-1"></div>
+    <div class="liquid-orb orb-2"></div>
+    <div class="liquid-orb orb-3"></div>
+    <div class="liquid-orb orb-4"></div>
+  </div>
+
+  <div class="app-wrapper">
+    <!-- iOS 27 Liquid Glass Sidebar -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-brand">
+        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="CircuitSense AI Logo" class="brand-logo">
+        <div class="brand-info">
+          <h1>CircuitSense AI</h1>
+          <span class="brand-badge">E-Waste Vision v1.0</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Navigation</div>
+        
+        <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          Overview
+        </a>
+
+        <a href="{{ url_for('analyze') }}" class="nav-link {% if request.endpoint == 'analyze' %}active{% endif %}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          New Analysis
+        </a>
+
+        <a href="{{ url_for('history') }}" class="nav-link {% if request.endpoint == 'history' %}active{% endif %}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          Analysis History
+        </a>
+
+        <div class="nav-section-title">Analysis Modules</div>
+
+        <a href="{{ url_for('inventory_catalogue') }}" class="nav-link {% if request.endpoint == 'inventory_catalogue' %}active{% endif %}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+          Component Inventory
+        </a>
+
+        <a href="{{ url_for('inventory_catalogue') }}#valuation" class="nav-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="12" y1="1" x2="12" y2="23"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          Valuation Engine
+        </a>
+
+        <a href="{{ url_for('material_analysis_info') }}" class="nav-link {% if request.endpoint == 'material_analysis_info' %}active{% endif %}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          Material Analysis
+        </a>
+
+        <div class="nav-section-title">System</div>
+
+        <a href="{{ url_for('about') }}" class="nav-link {% if request.endpoint == 'about' %}active{% endif %}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          About Project
+        </a>
+      </nav>
+
+      <!-- Sidebar Status Card -->
+      <div class="sidebar-footer">
+        <div class="model-status-card">
+          <div class="status-indicator">
+            <span class="pulse-dot {% if model_status.is_demo %}demo{% else %}trained{% endif %}"></span>
+            <span>{% if model_status.is_demo %}Demo Mode Active{% else %}YOLOv8 Online{% endif %}</span>
+          </div>
+          <small style="font-size: 0.7rem; color: var(--text-muted); line-height: 1.2;">
+            {% if model_status.is_demo %}
+              Simulated CV pipeline (Awaiting models/best.pt)
+            {% else %}
+              Custom trained weights verified
+            {% endif %}
+          </small>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Viewport -->
+    <div class="app-main">
+      <!-- Topbar Navigation -->
+      <header class="app-topbar">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Navigation Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <div class="topbar-breadcrumbs">
+            <span>CircuitSense</span>
+            <span>/</span>
+            <span class="active">{% block page_breadcrumb %}Dashboard{% endblock %}</span>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <a href="{{ url_for('analyze') }}" class="btn btn-primary btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Analyze Circuit Board
+          </a>
+        </div>
+      </header>
+
+      <!-- Flash Notification Messages -->
+      <div style="padding: 16px 36px 0 36px; max-width: 1440px; width: 100%; margin: 0 auto;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert-banner {% if category == 'error' %}alert-danger{% elif category == 'success' %}alert-success{% else %}alert-info{% endif %}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  {% if category == 'error' %}
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                  {% elif category == 'success' %}
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                  {% else %}
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                  {% endif %}
+                </svg>
+                <div>{{ message }}</div>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+      </div>
+
+      <!-- Page Content -->
+      <main class="viewport-content">
+        {% block content %}{% endblock %}
+      </main>
+
+      <!-- Persistent Footer Notice -->
+      <footer style="padding: 24px 36px; border-top: var(--glass-border); text-align: center; color: var(--text-muted); font-size: 0.78rem;">
+        <p><strong>Statutory Notice:</strong> CircuitSense AI generates decision-support estimates from visual computer vision and published empirical reference tables. It does not provide certified chemical spectrometry assays or guaranteed resale values.</p>
+        <p style="margin-top: 4px;">&copy; {{ current_year }} CircuitSense AI &bull; Internal AI/ML College Hackathon &bull; Ultrasonic Vision Engineering</p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>
