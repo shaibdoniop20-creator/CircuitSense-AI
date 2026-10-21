@@ -572,5 +572,10 @@ def upload_too_large(error):
 
 
 if __name__ == "__main__":
-    # Run locally on standard port 5000
-    app.run(host="127.0.0.1", port=5000, debug=Config.DEBUG)
+    import socket
+    default_port = 5000
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as _s:
+        if _s.connect_ex(("127.0.0.1", default_port)) == 0:
+            default_port = 5001
+    port = int(os.environ.get("PORT", default_port))
+    app.run(host="127.0.0.1", port=port, debug=Config.DEBUG)

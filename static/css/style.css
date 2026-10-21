@@ -1228,50 +1228,12 @@ button, input, select, textarea {
   box-shadow: 0 0 6px #06b6d4;
 }
 
-/* Signature Stitch Corner Reticles */
-.corner-reticle {
-  position: relative;
-}
-
+/* Signature Stitch Corner Reticles - Disabled */
 .corner-reticle::before,
 .corner-reticle::after,
 .reticle-bl,
 .reticle-br {
-  content: "";
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  pointer-events: none;
-  border-color: #06b6d4;
-  z-index: 10;
-}
-
-.corner-reticle::before {
-  top: 10px;
-  left: 10px;
-  border-top: 2px solid #06b6d4;
-  border-left: 2px solid #06b6d4;
-}
-
-.corner-reticle::after {
-  top: 10px;
-  right: 10px;
-  border-top: 2px solid #06b6d4;
-  border-right: 2px solid #06b6d4;
-}
-
-.reticle-bl {
-  bottom: 10px;
-  left: 10px;
-  border-bottom: 2px solid #06b6d4;
-  border-left: 2px solid #06b6d4;
-}
-
-.reticle-br {
-  bottom: 10px;
-  right: 10px;
-  border-bottom: 2px solid #06b6d4;
-  border-right: 2px solid #06b6d4;
+  display: none !important;
 }
 
 /* High-Precision Dropzone */
