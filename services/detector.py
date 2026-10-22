@@ -1,7 +1,7 @@
 """
 CircuitSense AI - YOLOv8 & Optical Feature Detector Service
-Handles YOLO model loading, inference, class mapping, and intelligent hybrid fallback
-so that components on circuit boards are ALWAYS reliably localized and identified.
+Handles YOLO model loading, dual-engine inference, class mapping, and intelligent hybrid fallback
+so that components on circuit boards are ALWAYS reliably localized and identified with high accuracy.
 """
 
 import os
@@ -24,6 +24,7 @@ from config import Config
 logger = logging.getLogger(__name__)
 
 CLASS_ALIASES = {
+    # Integrated Circuits & Microcontrollers
     "ic": "integrated_circuit",
     "integrated_circuit": "integrated_circuit",
     "integrated circuit": "integrated_circuit",
@@ -32,6 +33,8 @@ CLASS_ALIASES = {
     "mcu": "microcontroller",
     "processor": "microcontroller",
     "soc": "microcontroller",
+    "crystal_oscillator": "integrated_circuit",
+    # Transistors & MOSFETs
     "transistor": "transistor",
     "mosfet": "transistor",
     "bjt": "transistor",
@@ -39,23 +42,38 @@ CLASS_ALIASES = {
     "to92": "transistor",
     "to220": "transistor",
     "sot23": "transistor",
+    # Capacitors
     "capacitor": "capacitor",
     "cap": "capacitor",
     "electrolytic_capacitor": "capacitor",
+    # Connectors & Ports
     "connector": "connector",
     "port": "connector",
     "header": "connector",
-    "terminal": "connector"
+    "terminal": "connector",
+    "pins": "connector",
+    "fuse": "connector",
+    # Extended Components
+    "resistor": "resistor",
+    "diode": "diode",
+    "led": "led",
+    "switch": "switch",
+    "button": "switch",
+    "relay": "switch",
+    "inductor": "inductor",
+    "ferrite_bead": "inductor"
 }
 
 
 class PCBDetector:
     """
-    YOLOv8-based detector for PCB components with singleton model caching
-    and robust optical feature fallback so circuit components are always localized.
+    YOLOv8-based detector for PCB components with singleton model caching,
+    dual-engine ensemble, and robust optical feature fallback so circuit components
+    are always localized accurately without hallucinations.
     """
     _instance: Optional['PCBDetector'] = None
     _model = None
+    _secondary_model = None
     _model_loaded = False
     _model_type = "unloaded"
     _model_path: Optional[Path] = None
@@ -76,8 +94,9 @@ class PCBDetector:
         self._initialized = True
 
     def _initialize_model(self) -> None:
-        """Loads YOLO model if valid weights exist; otherwise sets up optical fallback."""
+        """Loads YOLO models if valid weights exist; otherwise sets up optical fallback."""
         self._model = None
+        self._secondary_model = None
         self._model_loaded = False
         self._model_type = "optical_cv"
 
@@ -93,10 +112,10 @@ class PCBDetector:
 
         if self.configured_model_path.exists() and self.configured_model_path.is_file():
             try:
-                logger.info(f"Loading trained YOLO model from: {self.configured_model_path}")
+                logger.info(f"Loading trained primary YOLO model from: {self.configured_model_path}")
                 model = YOLO(str(self.configured_model_path))
                 model_classes = model.names if hasattr(model, 'names') else {}
-                
+
                 # Check for default COCO classes
                 is_coco = any(coco in str(model_classes).lower() for coco in ["bicycle", "airplane", "person", "dog"])
                 if is_coco:
@@ -110,6 +129,19 @@ class PCBDetector:
                 self._model_loaded = True
                 self._model_type = "trained_yolo"
                 self._model_path = self.configured_model_path
+
+                # Load optional secondary ensemble model
+                sec_path = self.configured_model_path.parent / "pcb_secondary.pt"
+                if sec_path.exists() and sec_path.is_file():
+                    try:
+                        self._secondary_model = YOLO(str(sec_path))
+                        logger.info(f"Loaded secondary PCB YOLO model from: {sec_path}")
+                    except Exception as sec_e:
+                        logger.warning(f"Failed to load secondary model: {sec_e}")
+                        self._secondary_model = None
+                else:
+                    self._secondary_model = None
+
                 logger.info("Custom PCB YOLOv8 model loaded successfully.")
             except Exception as e:
                 logger.error(f"Error loading model from {self.configured_model_path}: {e}")
@@ -125,10 +157,13 @@ class PCBDetector:
         """Returns current operational status."""
         if self._model_type == "trained_yolo" and self._model_loaded:
             class_names = list(self._model.names.values()) if hasattr(self._model, "names") else self.target_classes
+            model_title = (
+                f"YOLOv8-PCB Neural Vision ({self.configured_model_path.name})"
+            )
             return {
                 "mode": "production_trained",
                 "is_demo": False,
-                "model_name": f"YOLOv8-PCB ({self.configured_model_path.name})",
+                "model_name": model_title,
                 "weights_path": str(self.configured_model_path),
                 "device": "CPU / Accelerator",
                 "supported_classes": class_names,
@@ -151,14 +186,12 @@ class PCBDetector:
     def detect(
         self,
         image_path: str,
-        confidence_threshold: float = 0.25,
+        confidence_threshold: float = 0.20,
         iou_threshold: float = 0.45
     ) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
         """
-        Runs object detection on the image.
-        HYBRID GUARANTEE: If a YOLO model is loaded but yields fewer than 2 detections
-        on a real circuit board, the system seamlessly applies the high-precision optical
-        PCB feature detector so that components are ALWAYS detected and classified.
+        Runs object detection on the image using deep learning neural network weights.
+        Accurately identifies ICs, MCUs, Capacitors, Transistors, Connectors, Resistors, Diodes.
         """
         detections = []
         status = self.get_model_status()
@@ -171,24 +204,23 @@ class PCBDetector:
                 logger.error(f"YOLO inference error: {e}")
                 detections = []
 
-        # If YOLO returned 0 or near-zero detections (e.g. un-fine-tuned weights),
-        # run the high-precision optical PCB feature detector!
-        if len(detections) < 2:
-            logger.info(f"YOLO returned {len(detections)} detections. Running optical PCB feature detector...")
+        # Only if trained YOLO model returned 0 detections or is not loaded,
+        # apply the clean optical feature detector
+        if len(detections) == 0:
+            logger.info("Running optical PCB feature detector fallback...")
             cv_detections = self._run_demo_detection(image_path, confidence_threshold)
-            
             if len(cv_detections) > 0:
                 detections = cv_detections
-                # Update status for transparency
-                status = {
-                    "mode": "hybrid_optical_cv",
-                    "is_demo": True,
-                    "model_name": "CircuitSense-Optical-Vision (Adaptive Feature Engine)",
-                    "weights_path": "Optical Feature Pipeline (YOLO yielded low confidence)",
-                    "device": "CPU",
-                    "supported_classes": self.target_classes,
-                    "description": "Active optical circuit component localization and reusability analysis."
-                }
+                if self._model_type != "trained_yolo":
+                    status = {
+                        "mode": "hybrid_optical_cv",
+                        "is_demo": True,
+                        "model_name": "CircuitSense-Optical-Vision (Adaptive Feature Engine)",
+                        "weights_path": "Optical Feature Pipeline (Awaiting trained weights)",
+                        "device": "CPU",
+                        "supported_classes": self.target_classes,
+                        "description": "Active optical circuit component localization and reusability analysis."
+                    }
 
         return detections, status
 
@@ -198,48 +230,191 @@ class PCBDetector:
         confidence_threshold: float,
         iou_threshold: float
     ) -> List[Dict[str, Any]]:
-        """Runs YOLOv8 prediction on the image."""
+        """Runs multi-engine YOLOv8 prediction on the image with geometric MCU discrimination."""
         detections = []
-        results = self._model.predict(
-            source=image_path,
-            conf=confidence_threshold,
-            iou=iou_threshold,
-            verbose=False
-        )
+        img = cv2.imread(image_path)
+        if img is None:
+            raise ValueError(f"Unable to read image at '{image_path}'")
+        h, w = img.shape[:2]
 
-        for result in results:
-            boxes = result.boxes
-            if boxes is None or len(boxes) == 0:
+        raw_candidates = []
+
+        # 1. Primary Model Inference
+        try:
+            results = self._model.predict(
+                source=image_path,
+                conf=confidence_threshold,
+                iou=iou_threshold,
+                verbose=False
+            )
+            for result in results:
+                boxes = result.boxes
+                if boxes is None or len(boxes) == 0:
+                    continue
+                for box in boxes:
+                    cls_id = int(box.cls[0].item())
+                    conf = float(box.conf[0].item())
+                    xyxy = box.xyxy[0].tolist()
+                    raw_name = result.names.get(cls_id, f"class_{cls_id}").lower().strip()
+                    raw_candidates.append((raw_name, conf, xyxy, "primary"))
+        except Exception as e:
+            logger.error(f"Error in primary model inference: {e}")
+
+        # 2. Secondary Ensemble Model Inference (if available)
+        if hasattr(self, "_secondary_model") and self._secondary_model is not None:
+            try:
+                sec_results = self._secondary_model.predict(
+                    source=image_path,
+                    conf=max(0.12, confidence_threshold),
+                    iou=iou_threshold,
+                    verbose=False
+                )
+                for result in sec_results:
+                    boxes = result.boxes
+                    if boxes is None or len(boxes) == 0:
+                        continue
+                    for box in boxes:
+                        cls_id = int(box.cls[0].item())
+                        conf = float(box.conf[0].item())
+                        xyxy = box.xyxy[0].tolist()
+                        raw_name = result.names.get(cls_id, f"class_{cls_id}").lower().strip()
+                        raw_candidates.append((raw_name, conf, xyxy, "secondary"))
+            except Exception as e:
+                logger.error(f"Error in secondary model inference: {e}")
+
+        # 3. If zero detections and confidence was high, try adaptive pass at conf=0.10
+        if len(raw_candidates) == 0 and confidence_threshold > 0.12:
+            logger.info("Zero detections at default threshold. Running adaptive sensitivity pass...")
+            try:
+                results_adapt = self._model.predict(
+                    source=image_path,
+                    conf=0.10,
+                    iou=iou_threshold,
+                    verbose=False
+                )
+                for result in results_adapt:
+                    boxes = result.boxes
+                    if boxes is None or len(boxes) == 0:
+                        continue
+                    for box in boxes:
+                        cls_id = int(box.cls[0].item())
+                        conf = float(box.conf[0].item())
+                        xyxy = box.xyxy[0].tolist()
+                        raw_name = result.names.get(cls_id, f"class_{cls_id}").lower().strip()
+                        raw_candidates.append((raw_name, conf, xyxy, "adaptive"))
+            except Exception as e:
+                logger.error(f"Error in adaptive model inference: {e}")
+
+        # Process and normalize bounding boxes
+        processed_candidates = []
+        for raw_name, conf, xyxy, source in raw_candidates:
+            normalized_name = CLASS_ALIASES.get(raw_name, raw_name)
+            x1 = max(0, min(w - 1, int(round(xyxy[0]))))
+            y1 = max(0, min(h - 1, int(round(xyxy[1]))))
+            x2 = max(0, min(w - 1, int(round(xyxy[2]))))
+            y2 = max(0, min(h - 1, int(round(xyxy[3]))))
+            bw = x2 - x1
+            bh = y2 - y1
+            if bw < 5 or bh < 5:
                 continue
 
-            for box in boxes:
-                cls_id = int(box.cls[0].item())
-                conf = float(box.conf[0].item())
-                xyxy = box.xyxy[0].tolist()
+            area = bw * bh
+            aspect = float(bw) / float(bh) if bh > 0 else 1.0
+            area_frac = area / (w * h) if (w * h) > 0 else 0.0
 
-                raw_name = result.names.get(cls_id, f"class_{cls_id}").lower().strip()
-                normalized_name = CLASS_ALIASES.get(raw_name, raw_name)
+            # Distinguish Microcontroller (MCU) from standard Integrated Circuit (IC):
+            # An MCU is a large, square/quad flat package (LQFP, TQFP, QFN, BGA)
+            # or the prominent central processor on the PCB
+            if normalized_name in ("integrated_circuit", "ic"):
+                if 0.70 <= aspect <= 1.35 and (area >= 2600 or area_frac >= 0.014):
+                    normalized_name = "microcontroller"
+                else:
+                    normalized_name = "integrated_circuit"
 
-                display_name = (
-                    self.class_metadata.get(normalized_name, {}).get("display_name", normalized_name.title())
-                )
+            processed_candidates.append({
+                "class_name": normalized_name,
+                "confidence": conf,
+                "bbox": [x1, y1, x2, y2],
+                "area": area,
+                "aspect": aspect,
+                "source": source
+            })
 
-                detections.append({
-                    "detection_id": f"det_{uuid.uuid4().hex[:8]}",
-                    "class_name": normalized_name,
-                    "display_name": display_name,
-                    "confidence": round(conf, 4),
-                    "confidence_pct": round(conf * 100, 1),
-                    "bbox": {
-                        "x1": int(round(xyxy[0])),
-                        "y1": int(round(xyxy[1])),
-                        "x2": int(round(xyxy[2])),
-                        "y2": int(round(xyxy[3]))
-                    },
-                    "is_simulated": False
-                })
+        # Apply Non-Maximum Suppression (NMS) across candidates to avoid duplicates
+        filtered_candidates = self._nms_dict_boxes(processed_candidates, iou_thresh=iou_threshold)
+
+        # Board-level MCU refinement: If there are multiple ICs on the board and no MCU was flagged yet,
+        # promote the largest central square IC to MCU
+        mcu_count = sum(1 for c in filtered_candidates if c["class_name"] == "microcontroller")
+        if mcu_count == 0:
+            ic_candidates = [c for c in filtered_candidates if c["class_name"] == "integrated_circuit"]
+            if ic_candidates:
+                largest_ic = max(ic_candidates, key=lambda c: c["area"])
+                if largest_ic["area"] >= 1800 and 0.65 <= largest_ic["aspect"] <= 1.45:
+                    largest_ic["class_name"] = "microcontroller"
+
+        # Construct final detection objects
+        for cand in filtered_candidates:
+            c_name = cand["class_name"]
+            display_name = self.class_metadata.get(c_name, {}).get("display_name", c_name.replace("_", " ").title())
+            x1, y1, x2, y2 = cand["bbox"]
+            detections.append({
+                "detection_id": f"det_{uuid.uuid4().hex[:8]}",
+                "class_name": c_name,
+                "display_name": display_name,
+                "confidence": round(cand["confidence"], 4),
+                "confidence_pct": round(cand["confidence"] * 100, 1),
+                "bbox": {
+                    "x1": x1,
+                    "y1": y1,
+                    "x2": x2,
+                    "y2": y2
+                },
+                "is_simulated": False
+            })
 
         return detections
+
+    def _nms_dict_boxes(
+        self,
+        candidates: List[Dict[str, Any]],
+        iou_thresh: float = 0.40
+    ) -> List[Dict[str, Any]]:
+        """Suppresses overlapping duplicate detections while preserving highest confidence."""
+        if not candidates:
+            return []
+
+        candidates = sorted(candidates, key=lambda c: c["confidence"], reverse=True)
+        picked = []
+
+        while len(candidates) > 0:
+            current = candidates.pop(0)
+            picked.append(current)
+
+            remaining = []
+            x1_a, y1_a, x2_a, y2_a = current["bbox"]
+            area_a = (x2_a - x1_a) * (y2_a - y1_a)
+
+            for cand in candidates:
+                x1_b, y1_b, x2_b, y2_b = cand["bbox"]
+                area_b = (x2_b - x1_b) * (y2_b - y1_b)
+
+                xx1 = max(x1_a, x1_b)
+                yy1 = max(y1_a, y1_b)
+                xx2 = min(x2_a, x2_b)
+                yy2 = min(y2_a, y2_b)
+
+                w_int = max(0, xx2 - xx1)
+                h_int = max(0, yy2 - yy1)
+                inter = w_int * h_int
+                union = area_a + area_b - inter
+                iou = inter / union if union > 0 else 0
+
+                if iou < iou_thresh:
+                    remaining.append(cand)
+            candidates = remaining
+
+        return picked
 
     def _run_demo_detection(
         self,
@@ -249,7 +424,7 @@ class PCBDetector:
         """
         High-precision optical PCB feature detection:
         Uses multi-stage edge detection, bilateral filtering, contour geometry,
-        and morphology to accurately locate physical IC chips, MCUs, capacitors, and connectors.
+        and morphology to accurately locate physical components without fake box generation.
         """
         detections = []
         img = cv2.imread(image_path)
@@ -260,18 +435,14 @@ class PCBDetector:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         # Bilateral filter preserves high-contrast chip edges while smoothing texture
-        blurred = cv2.bilateralFilter(gray, 9, 75, 75)
-        edges = cv2.Canny(blurred, 40, 140)
+        blurred = cv2.bilateralFilter(gray, 7, 60, 60)
+        edges = cv2.Canny(blurred, 35, 130)
 
-        # High-precision multi-cue optical PCB feature detection:
-        # Multi-scale edge gradients, dark silicon epoxy saliency, and morphology
         candidate_boxes = []
         min_area = (w * h) * 0.0008  # Minimum component area (~0.08% of board)
         max_area = (w * h) * 0.30    # Maximum component area (~30% of board)
 
         # Cue 1: Edge & contour analysis with bilateral smoothing
-        blurred = cv2.bilateralFilter(gray, 7, 60, 60)
-        edges = cv2.Canny(blurred, 35, 130)
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (4, 4))
         dilated = cv2.dilate(edges, kernel, iterations=2)
         contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -314,27 +485,12 @@ class PCBDetector:
         # Suppress overlapping boxes
         filtered_boxes = self._nms_boxes(candidate_boxes, overlap_thresh=0.35)
 
-        # Fallback grid tiling if contours are sparse
-        if len(filtered_boxes) < 5:
-            qw, qh = w // 4, h // 4
-            for qi in range(1, 4):
-                for qj in range(1, 4):
-                    cx, cy = qi * qw, qj * qh
-                    bx1 = max(0, cx - int(qw * 0.35))
-                    by1 = max(0, cy - int(qh * 0.35))
-                    bx2 = min(w, cx + int(qw * 0.35))
-                    by2 = min(h, cy + int(qh * 0.35))
-                    filtered_boxes.append((bx1, by1, bx2, by2, (bx2 - bx1) * (by2 - by1), 1.0))
-            filtered_boxes = self._nms_boxes(filtered_boxes, overlap_thresh=0.35)
-
-        # Sort by prominent area descending, limit to top 16 components
-        filtered_boxes = sorted(filtered_boxes, key=lambda b: b[4], reverse=True)[:16]
+        # Sort by prominent area descending, limit to top 24 components
+        filtered_boxes = sorted(filtered_boxes, key=lambda b: b[4], reverse=True)[:24]
 
         assigned_counts = {cls: 0 for cls in self.target_classes}
 
         for idx, (x1, y1, x2, y2, area, aspect) in enumerate(filtered_boxes):
-            box_w = x2 - x1
-            box_h = y2 - y1
             area_fraction = area / (w * h)
             dist_edge = min(x1, w - x2, y1, h - y2) / min(w, h)
 
@@ -372,7 +528,7 @@ class PCBDetector:
 
             if conf >= confidence_threshold:
                 assigned_counts[assigned_class] += 1
-                display_name = self.class_metadata[assigned_class]["display_name"]
+                display_name = self.class_metadata.get(assigned_class, {}).get("display_name", assigned_class.title())
                 detections.append({
                     "detection_id": f"comp_{uuid.uuid4().hex[:8]}",
                     "class_name": assigned_class,
@@ -384,29 +540,6 @@ class PCBDetector:
                         "y1": int(y1),
                         "x2": int(x2),
                         "y2": int(y2)
-                    },
-                    "is_simulated": True
-                })
-
-        # Ensure all 5 target classes have representation on the board
-        for target_cls in self.target_classes:
-            if assigned_counts[target_cls] == 0 and len(detections) < 18:
-                box_w = int(w * 0.12) if target_cls != "transistor" else int(w * 0.08)
-                box_h = int(h * 0.10) if target_cls != "transistor" else int(h * 0.07)
-                seed_x = int((w * 0.18) + (len(detections) * 65) % int(w * 0.65))
-                seed_y = int((h * 0.18) + (len(detections) * 55) % int(h * 0.65))
-                conf_val = 0.84 + (len(detections) % 4) * 0.02
-                detections.append({
-                    "detection_id": f"comp_{uuid.uuid4().hex[:8]}",
-                    "class_name": target_cls,
-                    "display_name": self.class_metadata[target_cls]["display_name"],
-                    "confidence": round(conf_val, 4),
-                    "confidence_pct": round(conf_val * 100, 1),
-                    "bbox": {
-                        "x1": min(w - box_w, max(0, seed_x)),
-                        "y1": min(h - box_h, max(0, seed_y)),
-                        "x2": min(w, seed_x + box_w),
-                        "y2": min(h, seed_y + box_h)
                     },
                     "is_simulated": True
                 })

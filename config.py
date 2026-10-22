@@ -89,5 +89,46 @@ class Config:
             "bgr_color": (0, 179, 255),   # Amber BGR
             "rgb_color": (255, 179, 0),
             "description": "Electro-mechanical interface (USB, HDMI, audio, headers) for signal input/output and power coupling."
+        },
+        "resistor": {
+            "display_name": "Resistor",
+            "short_name": "Resistor",
+            "hex_color": "#FF5252",       # Coral Red
+            "bgr_color": (82, 82, 255),   # Red BGR
+            "rgb_color": (255, 82, 82),
+            "description": "Passive two-terminal SMD or through-hole resistive element limiting current flow."
+        },
+        "diode": {
+            "display_name": "Diode / Rectifier",
+            "short_name": "Diode",
+            "hex_color": "#FF4081",       # Hot Pink
+            "bgr_color": (129, 64, 255),  # Pink BGR
+            "rgb_color": (255, 64, 129),
+            "description": "Two-terminal semiconductor rectifying diode or transient voltage suppressor (TVS)."
+        },
+        "led": {
+            "display_name": "LED (Light Emitting Diode)",
+            "short_name": "LED",
+            "hex_color": "#E040FB",       # Neon Purple
+            "bgr_color": (251, 64, 224),
+            "rgb_color": (224, 64, 251),
+            "description": "Semiconductor photonic indicator emitting optical light under forward bias."
+        },
+        "switch": {
+            "display_name": "Switch / Pushbutton",
+            "short_name": "Switch",
+            "hex_color": "#64FFDA",       # Mint Teal
+            "bgr_color": (218, 255, 100),
+            "rgb_color": (100, 255, 218),
+            "description": "Electromechanical tactile pushbutton, DIP toggle switch, or latching relay."
+        },
+        "inductor": {
+            "display_name": "Inductor / Choke",
+            "short_name": "Inductor",
+            "hex_color": "#7C4DFF",       # Deep Violet
+            "bgr_color": (255, 77, 124),
+            "rgb_color": (124, 77, 255),
+            "description": "Passive wire-wound or multilayer magnetic energy storage coil for filtering and power conversion."
         }
     }
+

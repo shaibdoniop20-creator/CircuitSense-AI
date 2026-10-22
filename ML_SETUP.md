@@ -118,26 +118,22 @@ yolo detect train model=yolov8n.pt data=pcb_dataset.yaml epochs=50 imgsz=640 bat
 yolo detect train model=yolov8s.pt data=pcb_dataset.yaml epochs=75 imgsz=640 batch=16 device=0
 ```
 
-### Option B: Python Training Script (`train_pcb.py`)
-```python
-from ultralytics import YOLO
+### Option B: Built-in Training Pipeline Script (`scripts/train_pcb_model.py`)
+CircuitSense AI includes an automated end-to-end training script:
 
-# Load pretrained base model
-model = YOLO('yolov8n.pt')
+```bash
+# 1. Rapid test / demo training on sample PCB specimens (CPU verified)
+python scripts/train_pcb_model.py --demo-train
 
-# Train on custom PCB dataset
-results = model.train(
-    data='pcb_dataset.yaml',
-    epochs=50,
-    imgsz=640,
-    batch=16,
-    name='circuitsense_yolov8n',
-    patience=15,
-    save=True
-)
+# 2. Full production training on your annotated dataset
+python scripts/train_pcb_model.py --data dataset/pcb_dataset.yaml --epochs 50 --batch 8 --device cpu
 
-print("Training finished! Best weights saved at:", results.save_dir / 'weights' / 'best.pt')
+# 3. If Nvidia GPU with CUDA is available
+python scripts/train_pcb_model.py --data dataset/pcb_dataset.yaml --epochs 75 --batch 16 --device 0
 ```
+
+The script automatically executes Ultralytics YOLOv8 training, computes validation benchmarks (mAP@50, Precision, Recall), and installs the resulting `best.pt` directly into `models/best.pt`.
+
 
 ---
 

@@ -78,8 +78,79 @@ REUSABILITY_RULES = {
         ),
         "risks": "Capacitive degradation, dielectric breakdown, chemical electrolyte leak.",
         "secondary_demand": "Low component resale value; route to certified WEEE scrap recycler for aluminum reclamation."
+    },
+    "resistor": {
+        "status": "can_reuse",
+        "label": "Can Be Used Again",
+        "badge_class": "badge-green",
+        "hex_color": "#2ECC71",
+        "base_score": 95,
+        "action": "Multimeter Resistance Check",
+        "reason": (
+            "Passive thick-film or metal-film resistor. Negligible aging degradation; immediately "
+            "reusable if resistance measures within rated tolerance (1% to 5%)."
+        ),
+        "risks": "Overheating discoloration or termination solder fracturing.",
+        "secondary_demand": "Universal salvage utility across electronic prototyping and repair."
+    },
+    "diode": {
+        "status": "can_reuse",
+        "label": "Can Be Used Again",
+        "badge_class": "badge-green",
+        "hex_color": "#2ECC71",
+        "base_score": 89,
+        "action": "Diode Forward Drop Test",
+        "reason": (
+            "Discrete silicon junction rectifier or TVS diode. High solid-state durability if forward "
+            "voltage measures ~0.6V (Si) or ~0.3V (Schottky) and reverse leakage is near zero."
+        ),
+        "risks": "Reverse breakdown damage from voltage spikes.",
+        "secondary_demand": "High demand for secondary power conversion and DIY electronics."
+    },
+    "led": {
+        "status": "can_reuse",
+        "label": "Can Be Used Again",
+        "badge_class": "badge-green",
+        "hex_color": "#2ECC71",
+        "base_score": 90,
+        "action": "Low-Current Optical Test",
+        "reason": (
+            "Solid-state photonic indicator. 50,000+ hour operational lifespan with minimal degradation; "
+            "easily verified with 3V coin cell battery."
+        ),
+        "risks": "Overcurrent bonding wire burnout.",
+        "secondary_demand": "Popular in educational kits, maker boards, and indicator refurbishment."
+    },
+    "switch": {
+        "status": "can_reuse",
+        "label": "Can Be Used Again",
+        "badge_class": "badge-green",
+        "hex_color": "#2ECC71",
+        "base_score": 86,
+        "action": "Actuation & Contact Test",
+        "reason": (
+            "Tactile electromechanical switch or DIP toggle. Readily reusable if actuation click is firm "
+            "and contact resistance measures below 1 ohm."
+        ),
+        "risks": "Contact oxidation or internal spring fatigue.",
+        "secondary_demand": "Widely salvaged for keyboard, remote control, and appliance repair."
+    },
+    "inductor": {
+        "status": "can_reuse",
+        "label": "Can Be Used Again",
+        "badge_class": "badge-green",
+        "hex_color": "#2ECC71",
+        "base_score": 94,
+        "action": "Continuity & Inductance Check",
+        "reason": (
+            "Copper winding on ferrite core. Completely passive with no moving or chemical components; "
+            "virtually unlimited operational lifespan when enamel is intact."
+        ),
+        "risks": "Cracked ferrite core or damaged winding enamel.",
+        "secondary_demand": "High value in DC-DC buck converter and SMPS filter refurbishment."
     }
 }
+
 
 
 class ReusabilityService:

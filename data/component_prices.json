@@ -165,6 +165,77 @@
           "reliability_note": "Very durable; highly reusable in DIY power projects"
         }
       }
+    },
+    "resistor": {
+      "display_name": "Resistor",
+      "default_subtype": "generic_resistor",
+      "subtypes": {
+        "generic_resistor": {
+          "name": "SMD / Through-Hole Precision Resistor",
+          "min_price_inr": 0.5,
+          "max_price_inr": 3.0,
+          "source": "Bulk Electronics Salvage Index",
+          "condition_assumptions": "End terminations uncracked, resistance within 5% tolerance",
+          "reliability_note": "Universal utility in hobbyist repair and maker projects"
+        }
+      }
+    },
+    "diode": {
+      "display_name": "Diode / Rectifier",
+      "default_subtype": "rectifier_diode",
+      "subtypes": {
+        "rectifier_diode": {
+          "name": "General Purpose / Schottky Rectifier Diode",
+          "min_price_inr": 2.0,
+          "max_price_inr": 12.0,
+          "source": "Repair Workshop Semiconductor Benchmarks",
+          "condition_assumptions": "Glass / plastic case intact, forward drop nominal",
+          "reliability_note": "High utility in power supplies and reverse-polarity protection"
+        }
+      }
+    },
+    "led": {
+      "display_name": "LED (Light Emitting Diode)",
+      "default_subtype": "indicator_led",
+      "subtypes": {
+        "indicator_led": {
+          "name": "Surface Mount / 3mm / 5mm Indicator LED",
+          "min_price_inr": 1.5,
+          "max_price_inr": 8.0,
+          "source": "Hobbyist Maker Depot Pricing",
+          "condition_assumptions": "Epoxy lens clear, lights at 2.0V-3.2V",
+          "reliability_note": "High salvage utility for indicator panels"
+        }
+      }
+    },
+    "switch": {
+      "display_name": "Switch / Pushbutton",
+      "default_subtype": "tactile_switch",
+      "subtypes": {
+        "tactile_switch": {
+          "name": "Tactile Pushbutton / DIP Slide Switch",
+          "min_price_inr": 4.0,
+          "max_price_inr": 20.0,
+          "source": "Electronics Salvage Exchange",
+          "condition_assumptions": "Mechanical click positive, contact resistance < 1 ohm",
+          "reliability_note": "Commonly harvested for consumer remote and appliance repairs"
+        }
+      }
+    },
+    "inductor": {
+      "display_name": "Inductor / Choke",
+      "default_subtype": "power_inductor",
+      "subtypes": {
+        "power_inductor": {
+          "name": "Power Inductor / Toroid / Shielded Choke",
+          "min_price_inr": 5.0,
+          "max_price_inr": 25.0,
+          "source": "SMPS Power Supply Rebuild Survey",
+          "condition_assumptions": "Ferrite core uncracked, copper winding intact",
+          "reliability_note": "Essential for high-efficiency buck-boost repair"
+        }
+      }
     }
   }
 }
+
