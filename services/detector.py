@@ -185,21 +185,28 @@ class PCBDetector:
 
     def detect(
         self,
-        image_path: str,
+        image_input: Any = None,
         confidence_threshold: float = 0.20,
-        iou_threshold: float = 0.45
+        iou_threshold: float = 0.45,
+        image_path: Optional[str] = None
     ) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
         """
-        Runs object detection on the image using deep learning neural network weights.
+        Runs object detection on the image (file path or in-memory numpy array) using
+        deep learning neural network weights.
         Accurately identifies ICs, MCUs, Capacitors, Transistors, Connectors, Resistors, Diodes.
         """
+        if image_input is None:
+            image_input = image_path
+        if image_input is None:
+            raise ValueError("No image input provided to detector.")
+
         detections = []
         status = self.get_model_status()
 
         # Attempt YOLO inference if loaded
         if self._model_type == "trained_yolo" and self._model is not None:
             try:
-                detections = self._run_yolo_inference(image_path, confidence_threshold, iou_threshold)
+                detections = self._run_yolo_inference(image_input, confidence_threshold, iou_threshold)
             except Exception as e:
                 logger.error(f"YOLO inference error: {e}")
                 detections = []
@@ -208,7 +215,7 @@ class PCBDetector:
         # apply the clean optical feature detector
         if len(detections) == 0:
             logger.info("Running optical PCB feature detector fallback...")
-            cv_detections = self._run_demo_detection(image_path, confidence_threshold)
+            cv_detections = self._run_demo_detection(image_input, confidence_threshold)
             if len(cv_detections) > 0:
                 detections = cv_detections
                 if self._model_type != "trained_yolo":
@@ -226,15 +233,21 @@ class PCBDetector:
 
     def _run_yolo_inference(
         self,
-        image_path: str,
+        image_input: Any,
         confidence_threshold: float,
         iou_threshold: float
     ) -> List[Dict[str, Any]]:
         """Runs multi-engine YOLOv8 prediction on the image with geometric MCU discrimination."""
         detections = []
-        img = cv2.imread(image_path)
-        if img is None:
-            raise ValueError(f"Unable to read image at '{image_path}'")
+        if isinstance(image_input, np.ndarray):
+            img = image_input
+            predict_source = image_input
+        else:
+            img = cv2.imread(str(image_input))
+            if img is None:
+                raise ValueError(f"Unable to read image at '{image_input}'")
+            predict_source = str(image_input)
+
         h, w = img.shape[:2]
 
         raw_candidates = []
@@ -242,7 +255,7 @@ class PCBDetector:
         # 1. Primary Model Inference
         try:
             results = self._model.predict(
-                source=image_path,
+                source=predict_source,
                 conf=confidence_threshold,
                 iou=iou_threshold,
                 verbose=False
@@ -264,7 +277,7 @@ class PCBDetector:
         if hasattr(self, "_secondary_model") and self._secondary_model is not None:
             try:
                 sec_results = self._secondary_model.predict(
-                    source=image_path,
+                    source=predict_source,
                     conf=max(0.12, confidence_threshold),
                     iou=iou_threshold,
                     verbose=False
@@ -287,7 +300,7 @@ class PCBDetector:
             logger.info("Zero detections at default threshold. Running adaptive sensitivity pass...")
             try:
                 results_adapt = self._model.predict(
-                    source=image_path,
+                    source=predict_source,
                     conf=0.10,
                     iou=iou_threshold,
                     verbose=False
@@ -418,7 +431,7 @@ class PCBDetector:
 
     def _run_demo_detection(
         self,
-        image_path: str,
+        image_input: Any,
         confidence_threshold: float = 0.25
     ) -> List[Dict[str, Any]]:
         """
@@ -427,9 +440,12 @@ class PCBDetector:
         and morphology to accurately locate physical components without fake box generation.
         """
         detections = []
-        img = cv2.imread(image_path)
-        if img is None:
-            raise ValueError(f"Unable to read image at '{image_path}'")
+        if isinstance(image_input, np.ndarray):
+            img = image_input
+        else:
+            img = cv2.imread(str(image_input))
+            if img is None:
+                raise ValueError(f"Unable to read image at '{image_input}'")
 
         h, w = img.shape[:2]
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

@@ -5,7 +5,7 @@
 
 {% block content %}
 <div style="margin-bottom: 28px;">
-  <h1 style="font-size: 2.2rem; font-weight: 700; letter-spacing: -0.6px; color: #FFFFFF;">
+  <h1 style="font-size: 2.2rem; font-weight: 700; letter-spacing: -0.6px; color: var(--text-main);">
     Analysis History & Audit Archive
   </h1>
   <p style="color: var(--text-secondary); font-size: 1rem; margin-top: 6px;">
@@ -59,12 +59,12 @@
         <small style="color: var(--text-muted); font-size: 0.72rem;">{{ item.created_at }}</small>
       </div>
 
-      <h4 style="font-size: 1.05rem; font-weight: 600; color: #FFF; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ item.original_filename }}">
+      <h4 style="font-size: 1.05rem; font-weight: 600; color: var(--text-main); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ item.original_filename }}">
         {{ item.original_filename }}
       </h4>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; font-size: 0.8rem; color: var(--text-secondary);">
-        <div>Components: <strong style="color: #FFF;">{{ item.total_components }}</strong></div>
+        <div>Components: <strong style="color: var(--text-main);">{{ item.total_components }}</strong></div>
         <div>Confidence: <strong style="color: var(--accent-primary);">{{ (item.overall_confidence * 100)|round(1) }}%</strong></div>
         <div>Category: <span>{{ item.board_category|title }}</span></div>
         <div>Condition: <span>{{ item.board_condition|capitalize }}</span></div>
@@ -102,7 +102,7 @@
       <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
     </svg>
   </div>
-  <h3 style="font-size: 1.25rem; font-weight: 600; color: #FFF; margin-bottom: 6px;">No Analysis Records Found</h3>
+  <h3 style="font-size: 1.25rem; font-weight: 600; color: var(--text-main); margin-bottom: 6px;">No Analysis Records Found</h3>
   <p style="color: var(--text-secondary); font-size: 0.92rem; max-width: 440px; margin: 0 auto 20px auto;">
     {% if search_query %}
       No circuit boards matched your search query "{{ search_query }}". Try a different search or clear filters.

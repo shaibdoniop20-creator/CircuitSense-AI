@@ -6,10 +6,13 @@ Main Flask Application & API Routes
 import os
 import json
 import uuid
+import time
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Optional
+
+import cv2
 
 from flask import (
     Flask, render_template, request, redirect, url_for, flash,
@@ -174,36 +177,75 @@ def index():
 
 @app.route("/analyze", methods=["GET", "POST"])
 def analyze():
-    """Image upload and actual computer vision analysis pipeline."""
+    """Image upload, live camera frame ingestion, and actual computer vision analysis pipeline."""
     if request.method == "GET":
         return render_template("upload.html")
 
-    # POST: Process uploaded circuit board image
-    if "image" not in request.files:
-        flash("No image file provided in upload request.", "error")
-        return redirect(url_for("analyze"))
+    # POST: Process uploaded circuit board image OR captured camera frame
+    is_json = request.is_json
+    payload = request.get_json(silent=True) or {} if is_json else {}
 
-    file = request.files["image"]
-    if not file or file.filename == "":
-        flash("Please select a circuit board image to analyze.", "error")
-        return redirect(url_for("analyze"))
+    camera_frame = request.form.get("camera_frame") or payload.get("camera_frame")
+    board_category = (request.form.get("board_category") or payload.get("board_category") or "unknown").strip().lower()
+    board_condition = (request.form.get("board_condition") or payload.get("board_condition") or "intact").strip().lower()
+    
+    try:
+        conf_val = request.form.get("confidence") or payload.get("confidence") or Config.DEFAULT_CONFIDENCE
+        confidence_thresh = float(conf_val)
+    except (ValueError, TypeError):
+        confidence_thresh = Config.DEFAULT_CONFIDENCE
 
-    # Optional metadata from form
-    board_category = request.form.get("board_category", "unknown").strip().lower()
-    board_condition = request.form.get("board_condition", "intact").strip().lower()
-    confidence_thresh = float(request.form.get("confidence", Config.DEFAULT_CONFIDENCE))
-
-    # Generate unique analysis ID
     analysis_id = str(uuid.uuid4())
-    orig_filename_safe = secure_filename(file.filename) or f"circuit_{analysis_id[:8]}.jpg"
-    stored_filename = f"{analysis_id}_{orig_filename_safe}"
-    stored_path = Config.UPLOADS_DIR / stored_filename
+    stored_path = None
 
-    # Validate and save image safely
-    is_valid, err_msg, img_meta = ImageProcessor.validate_and_save_upload(file, stored_path)
-    if not is_valid:
-        flash(f"Image validation failed: {err_msg}", "error")
-        return redirect(url_for("analyze"))
+    if camera_frame:
+        # Process captured camera frame (base64 string)
+        orig_filename_safe = f"camera_capture_{analysis_id[:8]}.jpg"
+        stored_filename = f"{analysis_id}_{orig_filename_safe}"
+        stored_path = Config.UPLOADS_DIR / stored_filename
+
+        is_valid, err_msg, img_bgr, img_w, img_h = ImageProcessor.decode_base64_image(camera_frame)
+        if not is_valid or img_bgr is None:
+            if is_json or request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return jsonify({"status": "error", "message": f"Camera frame validation failed: {err_msg}"}), 400
+            flash(f"Camera frame validation failed: {err_msg}", "error")
+            return redirect(url_for("analyze"))
+
+        cv2.imwrite(str(stored_path), img_bgr, [cv2.IMWRITE_JPEG_QUALITY, 94])
+        file_size_bytes = stored_path.stat().st_size
+        img_meta = {
+            "width": img_w,
+            "height": img_h,
+            "file_size_bytes": file_size_bytes,
+            "file_size_kb": round(file_size_bytes / 1024, 1),
+            "format": "JPEG"
+        }
+    else:
+        # Process standard file upload
+        if "image" not in request.files:
+            if is_json or request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return jsonify({"status": "error", "message": "No image file provided in upload request."}), 400
+            flash("No image file provided in upload request.", "error")
+            return redirect(url_for("analyze"))
+
+        file = request.files["image"]
+        if not file or file.filename == "":
+            if is_json or request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return jsonify({"status": "error", "message": "Please select a circuit board image to analyze."}), 400
+            flash("Please select a circuit board image to analyze.", "error")
+            return redirect(url_for("analyze"))
+
+        orig_filename_safe = secure_filename(file.filename) or f"circuit_{analysis_id[:8]}.jpg"
+        stored_filename = f"{analysis_id}_{orig_filename_safe}"
+        stored_path = Config.UPLOADS_DIR / stored_filename
+
+        # Validate and save image safely
+        is_valid, err_msg, img_meta = ImageProcessor.validate_and_save_upload(file, stored_path)
+        if not is_valid:
+            if is_json or request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return jsonify({"status": "error", "message": f"Image validation failed: {err_msg}"}), 400
+            flash(f"Image validation failed: {err_msg}", "error")
+            return redirect(url_for("analyze"))
 
     try:
         # Run actual detector inference
@@ -285,7 +327,7 @@ def analyze():
         db.session.commit()
 
         # If AJAX submission requested JSON, return it; otherwise redirect
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest" or request.accept_mimetypes.best == "application/json":
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest" or request.accept_mimetypes.best == "application/json" or is_json:
             return jsonify({
                 "status": "success",
                 "analysis_id": analysis_id,
@@ -297,13 +339,147 @@ def analyze():
     except Exception as e:
         logger.error(f"Analysis failed for {stored_filename}: {e}", exc_info=True)
         # Clean up uploaded file if failure occurred
-        if stored_path.exists():
+        if stored_path and stored_path.exists():
             try:
                 stored_path.unlink()
             except Exception:
                 pass
+        if is_json or request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return jsonify({"status": "error", "message": f"An error occurred during circuit board analysis: {str(e)}"}), 500
         flash(f"An error occurred during circuit board analysis: {str(e)}", "error")
         return redirect(url_for("analyze"))
+
+
+# ============================================================================
+# REAL-TIME LIVE CAMERA DETECTION API
+# ============================================================================
+
+@app.route("/api/detect-frame", methods=["POST"])
+def api_detect_frame():
+    """
+    High-speed, real-time camera frame component detection API.
+    Processes live video frames entirely in-memory without persistent disk clutter.
+    Reuses the singleton YOLOv8 model instance safely.
+    Returns: structured JSON with detected classes, confidences, bounding boxes,
+             component counts, triage summary, and optional base64 annotated frame.
+    """
+    start_time = time.perf_counter()
+
+    is_json = request.is_json
+    payload = request.get_json(silent=True) or {} if is_json else {}
+
+    frame_data = payload.get("frame") or request.form.get("frame")
+    file = request.files.get("frame") or request.files.get("image")
+
+    try:
+        conf_val = payload.get("confidence") or request.form.get("confidence") or Config.DEFAULT_CONFIDENCE
+        confidence_thresh = float(conf_val)
+    except (ValueError, TypeError):
+        confidence_thresh = Config.DEFAULT_CONFIDENCE
+
+    try:
+        iou_val = payload.get("iou") or request.form.get("iou") or Config.DEFAULT_IOU
+        iou_thresh = float(iou_val)
+    except (ValueError, TypeError):
+        iou_thresh = Config.DEFAULT_IOU
+
+    board_condition = (payload.get("board_condition") or request.form.get("board_condition") or "intact").strip().lower()
+    return_annotated = payload.get("return_annotated", True)
+    if isinstance(return_annotated, str):
+        return_annotated = return_annotated.lower() not in ("false", "0", "no")
+
+    # Decode frame safely
+    img_bgr = None
+    if frame_data:
+        is_valid, err_msg, img_bgr, w, h = ImageProcessor.decode_base64_image(frame_data)
+        if not is_valid or img_bgr is None:
+            return jsonify({"status": "error", "message": err_msg or "Invalid frame data."}), 400
+    elif file and file.filename != "":
+        import numpy as np
+        raw_bytes = file.read()
+        np_arr = np.frombuffer(raw_bytes, np.uint8)
+        img_bgr = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        if img_bgr is None:
+            return jsonify({"status": "error", "message": "Failed to decode uploaded image file."}), 400
+        h, w = img_bgr.shape[:2]
+    else:
+        return jsonify({"status": "error", "message": "No frame payload or file provided."}), 400
+
+    if w < 32 or h < 32:
+        return jsonify({"status": "error", "message": f"Frame dimensions ({w}x{h}) are too small for component analysis."}), 400
+
+    try:
+        # Run YOLOv8 inference on in-memory numpy frame
+        detections, model_status = detector.detect(
+            image_input=img_bgr,
+            confidence_threshold=confidence_thresh,
+            iou_threshold=iou_thresh
+        )
+
+        elapsed_ms = (time.perf_counter() - start_time) * 1000.0
+
+        # Build inventory summary with reusability triage
+        inventory_summary = InventoryService.build_inventory(
+            detections=detections,
+            confidence_threshold=0.0,
+            board_condition=board_condition
+        )
+
+        # Count components by target class
+        component_counts = {
+            cls_name: inventory_summary.get("by_class", {}).get(cls_name, {}).get("quantity", 0)
+            for cls_name in Config.TARGET_CLASSES
+        }
+
+        # Render annotated frame base64 data URL if requested
+        annotated_frame_b64 = None
+        if return_annotated:
+            annotated_frame_b64 = ImageProcessor.render_annotated_frame_base64(
+                img=img_bgr,
+                detections=detections,
+                confidence_filter=0.0,
+                quality=82
+            )
+
+        return jsonify({
+            "status": "success",
+            "inference_ms": round(elapsed_ms, 1),
+            "detections": detections,
+            "total_components": inventory_summary.get("total_components", 0),
+            "unique_classes": inventory_summary.get("unique_classes_count", 0),
+            "overall_confidence": round(inventory_summary.get("overall_average_confidence", 0.0), 4),
+            "overall_confidence_pct": round(inventory_summary.get("overall_average_confidence_pct", 0.0), 1),
+            "component_counts": component_counts,
+            "triage_summary": inventory_summary.get("triage_summary", {}),
+            "model_status": {
+                "mode": model_status.get("mode", "production_trained"),
+                "is_demo": model_status.get("is_demo", False),
+                "model_name": model_status.get("model_name", "YOLOv8-PCB"),
+                "device": model_status.get("device", "CPU")
+            },
+            "annotated_frame": annotated_frame_b64,
+            "frame_dims": {"width": w, "height": h}
+        })
+
+    except Exception as e:
+        logger.error(f"Live frame detection failed: {e}", exc_info=True)
+        return jsonify({
+            "status": "error",
+            "message": "Component inference encountered an internal error. Please try again."
+        }), 500
+
+
+@app.route("/api/model-status", methods=["GET"])
+def api_model_status():
+    """Returns model status and class metadata for dynamic frontend calibration."""
+    return jsonify({
+        "status": "success",
+        "model_status": detector.get_model_status(),
+        "target_classes": Config.TARGET_CLASSES,
+        "class_metadata": Config.CLASS_METADATA,
+        "default_confidence": Config.DEFAULT_CONFIDENCE,
+        "default_iou": Config.DEFAULT_IOU
+    })
 
 
 @app.route("/results/<analysis_id>")

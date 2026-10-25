@@ -5,6 +5,7 @@ class-coded bounding boxes, and generates component-level crops for inspection.
 """
 
 import os
+import base64
 import logging
 from pathlib import Path
 from typing import List, Dict, Any, Tuple, Optional
@@ -92,25 +93,79 @@ class ImageProcessor:
             return False, f"Invalid or corrupted image file: {str(e)}", None
 
     @staticmethod
-    def render_annotated_image(
-        original_image_path: str,
-        output_image_path: str,
+    def decode_base64_image(
+        base64_data: str,
+        max_bytes: int = 16 * 1024 * 1024
+    ) -> Tuple[bool, Optional[str], Optional[np.ndarray], int, int]:
+        """
+        Safely decodes a base64 encoded image string (with or without data URL header).
+        Validates size, format integrity, and pixel dimensions.
+        Returns: (is_valid, error_message, img_bgr, width, height)
+        """
+        if not base64_data or not isinstance(base64_data, str):
+            return False, "No frame data was supplied.", None, 0, 0
+
+        try:
+            # Strip data URL prefix if present (e.g., 'data:image/jpeg;base64,')
+            if "," in base64_data:
+                header, encoded = base64_data.split(",", 1)
+            else:
+                encoded = base64_data
+
+            # Approximate size check before decoding
+            approx_size = (len(encoded) * 3) / 4
+            if approx_size > max_bytes:
+                return False, f"Frame payload exceeds maximum allowed size ({round(max_bytes / (1024*1024), 1)} MB).", None, 0, 0
+
+            # Decode base64 bytes
+            img_bytes = base64.b64decode(encoded)
+            if len(img_bytes) == 0:
+                return False, "Decoded image buffer is empty (0 bytes).", None, 0, 0
+
+            # Decode into OpenCV BGR numpy array
+            np_arr = np.frombuffer(img_bytes, np.uint8)
+            img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+
+            if img is None:
+                return False, "OpenCV failed to decode image frame (corrupted or unsupported format).", None, 0, 0
+
+            h, w = img.shape[:2]
+            if w < 32 or h < 32:
+                return False, f"Frame dimensions ({w}x{h}) are too small for component analysis (minimum 32x32 px).", None, 0, 0
+
+            if w > 4096 or h > 4096:
+                # Downscale large frame for memory efficiency and safety
+                max_dim = 1920
+                scale = min(max_dim / w, max_dim / h)
+                new_w, new_h = int(w * scale), int(h * scale)
+                img = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
+                h, w = img.shape[:2]
+
+            return True, None, img, w, h
+
+        except Exception as e:
+            logger.error(f"Failed to decode base64 frame: {e}")
+            return False, f"Failed to decode image frame: {str(e)}", None, 0, 0
+
+    @staticmethod
+    def render_annotated_mat(
+        img: np.ndarray,
         detections: List[Dict[str, Any]],
         confidence_filter: float = 0.0
-    ) -> Tuple[str, int, int]:
+    ) -> np.ndarray:
         """
-        Renders clear bounding boxes, glowing badges, class labels, and confidence percentages.
-        Guarantees that labels near edges stay within visible image bounds.
-        Returns: (output_image_path, width, height)
+        Renders clear bounding boxes, glowing badges, class labels, and confidence percentages
+        onto an in-memory BGR numpy image.
+        Returns: annotated BGR numpy image copy
         """
-        img = cv2.imread(original_image_path)
-        if img is None:
-            raise ValueError(f"Could not load image from '{original_image_path}'")
+        if img is None or img.size == 0:
+            return img
 
-        h, w = img.shape[:2]
+        annotated = img.copy()
+        h, w = annotated.shape[:2]
 
         # Overlay layer for translucent glass badge backgrounds
-        overlay = img.copy()
+        overlay = annotated.copy()
 
         # Class colors from Config
         class_meta = Config.CLASS_METADATA
@@ -143,21 +198,21 @@ class ImageProcessor:
             cv2.rectangle(overlay, (x1, y1), (x2, y2), color_bgr, -1)
 
             # Draw outer rectangle
-            cv2.rectangle(img, (x1, y1), (x2, y2), color_bgr, thickness)
+            cv2.rectangle(annotated, (x1, y1), (x2, y2), color_bgr, thickness)
 
             # Draw corner accents for high-tech aesthetic
             # Top-Left
-            cv2.line(img, (x1, y1), (x1 + min(corner_len, (x2 - x1) // 2), y1), color_bgr, thickness + 2)
-            cv2.line(img, (x1, y1), (x1, y1 + min(corner_len, (y2 - y1) // 2)), color_bgr, thickness + 2)
+            cv2.line(annotated, (x1, y1), (x1 + min(corner_len, (x2 - x1) // 2), y1), color_bgr, thickness + 2)
+            cv2.line(annotated, (x1, y1), (x1, y1 + min(corner_len, (y2 - y1) // 2)), color_bgr, thickness + 2)
             # Top-Right
-            cv2.line(img, (x2, y1), (x2 - min(corner_len, (x2 - x1) // 2), y1), color_bgr, thickness + 2)
-            cv2.line(img, (x2, y1), (x2, y1 + min(corner_len, (y2 - y1) // 2)), color_bgr, thickness + 2)
+            cv2.line(annotated, (x2, y1), (x2 - min(corner_len, (x2 - x1) // 2), y1), color_bgr, thickness + 2)
+            cv2.line(annotated, (x2, y1), (x2, y1 + min(corner_len, (y2 - y1) // 2)), color_bgr, thickness + 2)
             # Bottom-Left
-            cv2.line(img, (x1, y2), (x1 + min(corner_len, (x2 - x1) // 2), y2), color_bgr, thickness + 2)
-            cv2.line(img, (x1, y2), (x1, y2 - min(corner_len, (y2 - y1) // 2)), color_bgr, thickness + 2)
+            cv2.line(annotated, (x1, y2), (x1 + min(corner_len, (x2 - x1) // 2), y2), color_bgr, thickness + 2)
+            cv2.line(annotated, (x1, y2), (x1, y2 - min(corner_len, (y2 - y1) // 2)), color_bgr, thickness + 2)
             # Bottom-Right
-            cv2.line(img, (x2, y2), (x2 - min(corner_len, (x2 - x1) // 2), y2), color_bgr, thickness + 2)
-            cv2.line(img, (x2, y2), (x2, y2 - min(corner_len, (y2 - y1) // 2)), color_bgr, thickness + 2)
+            cv2.line(annotated, (x2, y2), (x2 - min(corner_len, (x2 - x1) // 2), y2), color_bgr, thickness + 2)
+            cv2.line(annotated, (x2, y2), (x2, y2 - min(corner_len, (y2 - y1) // 2)), color_bgr, thickness + 2)
 
             # Prepare Label Text
             short_name = meta.get("short_name", cls_name.upper())
@@ -173,10 +228,8 @@ class ImageProcessor:
             badge_w = text_w + (badge_pad_x * 2)
             badge_h = text_h + baseline + (badge_pad_y * 2)
 
-            # Default: above box
             label_y1 = y1 - badge_h
             if label_y1 < 0:
-                # Place inside top of box if at top edge
                 label_y1 = y1
 
             label_x1 = max(0, min(w - badge_w, x1))
@@ -184,23 +237,62 @@ class ImageProcessor:
             label_y2 = label_y1 + badge_h
 
             # Draw solid dark pill badge behind label text for contrast
-            cv2.rectangle(img, (label_x1, label_y1), (label_x2, label_y2), (23, 25, 29), -1)
+            cv2.rectangle(annotated, (label_x1, label_y1), (label_x2, label_y2), (23, 25, 29), -1)
             # Thin color accent border for badge
-            cv2.rectangle(img, (label_x1, label_y1), (label_x2, label_y2), color_bgr, 1)
+            cv2.rectangle(annotated, (label_x1, label_y1), (label_x2, label_y2), color_bgr, 1)
 
             # Draw text
             text_x = label_x1 + badge_pad_x
             text_y = label_y2 - baseline - badge_pad_y + 2
-            cv2.putText(img, label, (text_x, text_y), font, font_scale, (244, 246, 248), 1, cv2.LINE_AA)
+            cv2.putText(annotated, label, (text_x, text_y), font, font_scale, (244, 246, 248), 1, cv2.LINE_AA)
 
         # Blend semi-transparent box highlights (alpha = 0.08)
         alpha = 0.08
-        cv2.addWeighted(overlay, alpha, img, 1 - alpha, 0, img)
+        cv2.addWeighted(overlay, alpha, annotated, 1 - alpha, 0, annotated)
+
+        return annotated
+
+    @staticmethod
+    def render_annotated_frame_base64(
+        img: np.ndarray,
+        detections: List[Dict[str, Any]],
+        confidence_filter: float = 0.0,
+        quality: int = 85
+    ) -> str:
+        """
+        Renders bounding boxes onto an in-memory frame and returns a base64 JPEG data URL.
+        Avoids all disk writes for high-speed live camera streams.
+        """
+        annotated = ImageProcessor.render_annotated_mat(img, detections, confidence_filter)
+        success, encoded_buf = cv2.imencode(".jpg", annotated, [cv2.IMWRITE_JPEG_QUALITY, quality])
+        if not success:
+            raise RuntimeError("Failed to encode annotated frame as JPEG.")
+        b64_str = base64.b64encode(encoded_buf).decode("utf-8")
+        return f"data:image/jpeg;base64,{b64_str}"
+
+    @staticmethod
+    def render_annotated_image(
+        original_image_path: str,
+        output_image_path: str,
+        detections: List[Dict[str, Any]],
+        confidence_filter: float = 0.0
+    ) -> Tuple[str, int, int]:
+        """
+        Renders clear bounding boxes, glowing badges, class labels, and confidence percentages.
+        Guarantees that labels near edges stay within visible image bounds.
+        Returns: (output_image_path, width, height)
+        """
+        img = cv2.imread(original_image_path)
+        if img is None:
+            raise ValueError(f"Could not load image from '{original_image_path}'")
+
+        h, w = img.shape[:2]
+        annotated = ImageProcessor.render_annotated_mat(img, detections, confidence_filter)
 
         # Save output image
         out_path = Path(output_image_path)
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        cv2.imwrite(str(out_path), img, [cv2.IMWRITE_JPEG_QUALITY, 92])
+        cv2.imwrite(str(out_path), annotated, [cv2.IMWRITE_JPEG_QUALITY, 92])
 
         return str(out_path), w, h
 

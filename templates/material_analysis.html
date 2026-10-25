@@ -5,7 +5,7 @@
 
 {% block content %}
 <div style="margin-bottom: 28px;">
-  <h1 style="font-size: 2.2rem; font-weight: 700; letter-spacing: -0.6px; color: #FFFFFF;">
+  <h1 style="font-size: 2.2rem; font-weight: 700; letter-spacing: -0.6px; color: var(--text-main);">
     E-Waste Material Analysis Methodology
   </h1>
   <p style="color: var(--text-secondary); font-size: 1rem; margin-top: 6px;">
@@ -34,7 +34,7 @@
   <div class="glass-card">
     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
       <span class="badge badge-green">MODE A</span>
-      <h3 style="font-size: 1.15rem; color: #FFF;">Reference-Based Estimation</h3>
+      <h3 style="font-size: 1.15rem; color: var(--text-main);">Reference-Based Estimation</h3>
     </div>
     <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
       Activated when the board type is categorized (e.g. Motherboard, GPU, Controller, Power Supply). Applies empirical mass fraction data from UNEP and EMPA laboratory disassembly studies.
@@ -47,7 +47,7 @@
   <div class="glass-card">
     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
       <span class="badge badge-amber">MODE B</span>
-      <h3 style="font-size: 1.15rem; color: #FFF;">Insufficient Data Protocol</h3>
+      <h3 style="font-size: 1.15rem; color: var(--text-main);">Insufficient Data Protocol</h3>
     </div>
     <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
       Activated for unclassified, damaged, or unknown boards. The system transparently withholds percentage fabrication, declaring that RGB imagery alone cannot determine chemical composition without spectrometry.
@@ -59,7 +59,7 @@
 </div>
 
 <!-- Empirical Reference Benchmarks by Board Category -->
-<h2 style="font-size: 1.6rem; font-weight: 700; color: #FFFFFF; margin-bottom: 20px;">
+<h2 style="font-size: 1.6rem; font-weight: 700; color: var(--text-main); margin-bottom: 20px;">
   Board Category Chemical Benchmarks
 </h2>
 
@@ -68,7 +68,7 @@
   <div class="glass-card">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; border-bottom: var(--glass-border); padding-bottom: 12px;">
       <div>
-        <h3 style="font-size: 1.25rem; font-weight: 600; color: #FFFFFF;">{{ cat.display_name }}</h3>
+        <h3 style="font-size: 1.25rem; font-weight: 600; color: var(--text-main);">{{ cat.display_name }}</h3>
         <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;">{{ cat.description }}</p>
       </div>
       <span class="badge {% if cat.has_sufficient_data %}badge-cyan{% else %}badge-amber{% endif %}">
@@ -88,7 +88,7 @@
 
       <div style="padding: 12px 14px; background: rgba(255, 255, 255, 0.02); border-radius: var(--border-radius-sm); border: var(--glass-border);">
         <small style="color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; font-weight: 600;">Typical Board Mass</small>
-        <div style="font-size: 1.2rem; font-weight: 700; color: #FFF; margin-top: 2px;">
+        <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-main); margin-top: 2px;">
           {{ cat.estimated_mass_range_grams.typical }} grams
         </div>
         <small style="color: var(--text-muted); font-size: 0.72rem;">Range: {{ cat.estimated_mass_range_grams.min }}g - {{ cat.estimated_mass_range_grams.max }}g</small>
@@ -148,7 +148,7 @@
 
 <!-- Literature Sources -->
 <div class="glass-panel">
-  <h4 style="color: #FFF; font-size: 0.95rem; margin-bottom: 8px;">Literature & Regulatory References:</h4>
+  <h4 style="color: var(--text-main); font-size: 0.95rem; margin-bottom: 8px;">Literature & Regulatory References:</h4>
   <ul style="padding-left: 20px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.6;">
     {% for src in reference_metadata.sources %}
     <li>{{ src }}</li>

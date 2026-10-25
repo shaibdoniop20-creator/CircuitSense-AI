@@ -234,7 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (hudCoords) hudCoords.textContent = "X: 142.4mm / Y: 88.2mm / Z: 12.0mm";
     if (hudStatus) {
       hudStatus.textContent = "CALIBRATION READY";
-      hudStatus.style.color = "#4cd7f6";
+      hudStatus.style.color = "#0284c7";
     }
 
     if (shelfStatusDot) {
@@ -340,7 +340,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Handle Form Submission with Animated Progress Overlay
   if (uploadForm) {
     uploadForm.addEventListener("submit", (e) => {
-      if (submitBtn && submitBtn.disabled) {
+      const cameraPayload = document.getElementById("cameraFramePayload");
+      const hasCameraFrame = cameraPayload && cameraPayload.value && cameraPayload.value.length > 0;
+
+      if (!hasCameraFrame && submitBtn && submitBtn.disabled) {
         e.preventDefault();
         return;
       }

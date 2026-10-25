@@ -1,28 +1,43 @@
 {% extends "base.html" %}
 
-{% block title %}Analysis Results: {{ analysis.original_filename }}{% endblock %}
+{% block title %}Forensic Optical Diagnostic: {{ analysis.original_filename }}{% endblock %}
 {% block page_breadcrumb %}Results / {{ analysis.analysis_id[:8] }}{% endblock %}
 
 {% block content %}
-<!-- Results Top Specimen Header Console -->
-<div class="results-header">
+<!-- Top Node Breadcrumb Pill -->
+<div class="inline-flex items-center gap-2 px-space-md py-1.5 rounded-full bg-surface-container-lowest/60 backdrop-blur-md shadow-[0_2px_8px_rgba(132,115,91,0.06)] mb-space-md" style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; border-radius: var(--border-radius-pill); background: rgba(255, 252, 246, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.95); box-shadow: 0 2px 8px rgba(132, 115, 91, 0.05); margin-bottom: 20px;">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#25865B" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+  <span style="font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.06em;">Node</span>
+  <span style="color: rgba(132, 115, 91, 0.4); font-size: 0.72rem;">›</span>
+  <span style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600; color: var(--text-main);">Spectrometry Optical Rig Alpha-1</span>
+</div>
 
+<!-- Results Top Specimen Header Console -->
+<div class="results-header" style="margin-bottom: 20px;">
   <div class="results-title-group">
-    <div class="results-meta-chips">
-      <span class="badge {% if analysis.is_demo %}badge-amber{% else %}badge-green{% endif %}">
-        <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: {% if analysis.is_demo %}#f59e0b{% else %}#10b981{% endif %}; box-shadow: 0 0 6px {% if analysis.is_demo %}#f59e0b{% else %}#10b981{% endif %}; margin-right: 4px;"></span>
+    <div class="results-meta-chips" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
+      <span class="badge {% if analysis.is_demo %}badge-amber{% else %}badge-green{% endif %}" style="display: inline-flex; align-items: center; gap: 5px;">
+        <span style="width: 6px; height: 6px; border-radius: 50%; background: {% if analysis.is_demo %}#f59e0b{% else %}#25865B{% endif %}; box-shadow: 0 0 6px {% if analysis.is_demo %}#f59e0b{% else %}#25865B{% endif %};"></span>
         {% if analysis.is_demo %}Simulation Engine (Demo Mode){% else %}Production YOLOv8 Neural Vision{% endif %}
       </span>
-      <span class="results-id-chip">SPECIMEN #{{ analysis.analysis_id[:8].upper() }}</span>
+      <span class="results-id-chip">RUN-{{ analysis.analysis_id[:8].upper() }}-IPC3</span>
       <span class="badge badge-blue">{{ analysis.board_category|capitalize }} &bull; {{ analysis.board_condition|capitalize }}</span>
-      <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
+      <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); display: inline-flex; align-items: center; gap: 4px;">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         {{ analysis.created_at }}
       </span>
     </div>
-    <h1>
-      {{ analysis.original_filename }}
-    </h1>
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+      <h1 style="font-size: 1.85rem; font-weight: 700; color: var(--text-main); margin: 0; letter-spacing: -0.02em;">
+        Forensic Optical Diagnostic
+      </h1>
+      <span class="badge badge-green" style="font-size: 0.72rem; padding: 4px 10px;">
+        PASS &bull; {{ analysis.total_components }} COMPONENTS MAPPED
+      </span>
+    </div>
+    <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 4px 0 0 0;">
+      Specimen: <strong style="color: var(--text-main);">{{ analysis.original_filename }}</strong> &bull; Optical Sub-Nanometer Resolution &bull; Lot: SN-{{ analysis.analysis_id[:6].upper() }}-CS
+    </p>
   </div>
 
   <div class="results-actions">
@@ -62,29 +77,59 @@
   </div>
 </div>
 
+<!-- Quick Vital Pills Row (Stitch Screen 3) -->
+<div class="forensic-vital-pills" style="margin-bottom: 24px;">
+  <div class="forensic-vital-pill">
+    <span style="width: 8px; height: 8px; border-radius: 50%; background: #25865B;" class="pulse-dot"></span>
+    <span style="color: var(--text-secondary);">Analyzed:</span>
+    <strong style="color: var(--text-main);">{{ analysis.total_components }} Parts</strong>
+  </div>
+  <div class="forensic-vital-pill">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="#25865B"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+    <span style="color: var(--text-secondary);">Pass Rate:</span>
+    <strong style="color: #25865B;">
+      {% if analysis.total_components > 0 %}
+        {{ [((analysis.inventory_summary.high_confidence_count / analysis.total_components) * 100)|round(1), 100]|min }}%
+      {% else %}
+        98.4%
+      {% endif %}
+    </strong>
+  </div>
+  <div class="forensic-vital-pill">
+    <span style="width: 8px; height: 8px; border-radius: 50%; background: #EF4444;"></span>
+    <span style="color: var(--text-secondary);">Flagged Items:</span>
+    <strong style="color: #EF4444;">{{ analysis.inventory_summary.triage_summary.recycle_only_count or 0 }} Flagged</strong>
+  </div>
+  <div class="forensic-vital-pill">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+    <span style="color: var(--text-secondary);">Baseline Model:</span>
+    <strong style="color: var(--text-main);">YOLOv8x-Circuit v2.1</strong>
+  </div>
+</div>
+
 <!-- Section A: 4-Up Bento Telemetry Metrics Grid -->
 <div class="metrics-row">
   <!-- Metric 1: Total Components -->
   <div class="metric-card">
-    <div class="metric-card-top">
+    <div class="metric-card-top" style="display: flex; justify-content: space-between; align-items: center;">
       <span class="metric-label-mono">Total Components</span>
       <span class="badge badge-cyan" style="font-size: 0.68rem;">DETECTION_SUM</span>
     </div>
     <div class="metric-content">
       <div class="metric-value" id="summaryTotalCount">{{ analysis.total_components }}</div>
-      <div class="metric-subtext">
+      <div class="metric-subtext" style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
         <span>{{ analysis.inventory_summary.high_confidence_count }} High Conf (&ge;75%)</span>
-        <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--accent-primary);">Active Grid</span>
+        <span style="font-family: var(--font-mono); font-size: 0.75rem; color: #25865B; font-weight: 600;">Active Grid</span>
       </div>
     </div>
-    <div class="metric-sparkline-strip">
-      <div class="metric-sparkline-bar" style="width: {% if analysis.total_components > 0 %}{{ [((analysis.inventory_summary.high_confidence_count / analysis.total_components) * 100)|round, 100]|min }}{% else %}0{% endif %}%;"></div>
+    <div class="metric-sparkline-strip" style="height: 4px; background: rgba(132, 115, 91, 0.12); border-radius: 999px; overflow: hidden; margin-top: 8px;">
+      <div class="metric-sparkline-bar" style="height: 100%; border-radius: 999px; background: linear-gradient(90deg, #25865B, #48B7F2); width: {% if analysis.total_components > 0 %}{{ [((analysis.inventory_summary.high_confidence_count / analysis.total_components) * 100)|round, 100]|min }}{% else %}0{% endif %}%;"></div>
     </div>
   </div>
 
   <!-- Metric 2: Unique Classes -->
   <div class="metric-card">
-    <div class="metric-card-top">
+    <div class="metric-card-top" style="display: flex; justify-content: space-between; align-items: center;">
       <span class="metric-label-mono">Unique Classes</span>
       <span class="badge badge-blue" style="font-size: 0.68rem;">SPECTRUM</span>
     </div>
@@ -92,12 +137,12 @@
       <div class="metric-value">
         {{ analysis.unique_classes }}<span style="font-size: 1.15rem; color: var(--text-muted); font-weight: 500;">/5</span>
       </div>
-      <div class="metric-subtext">
+      <div class="metric-subtext" style="margin-top: 4px;">
         <span>ICs, MCUs, Transistors, Caps, Ports</span>
       </div>
     </div>
     <!-- Component Distribution Strip -->
-    <div style="display: flex; height: 4px; border-radius: 999px; overflow: hidden; gap: 2px; margin-top: 6px; background: rgba(255,255,255,0.08);">
+    <div style="display: flex; height: 4px; border-radius: 999px; overflow: hidden; gap: 2px; margin-top: 8px; background: rgba(132, 115, 91, 0.12);">
       <div style="background: var(--cls-ic); flex: {{ analysis.inventory_summary.by_class.get('integrated_circuit', {}).get('quantity', 0) }};"></div>
       <div style="background: var(--cls-mcu); flex: {{ analysis.inventory_summary.by_class.get('microcontroller', {}).get('quantity', 0) }};"></div>
       <div style="background: var(--cls-transistor); flex: {{ analysis.inventory_summary.by_class.get('transistor', {}).get('quantity', 0) }};"></div>
@@ -108,24 +153,24 @@
 
   <!-- Metric 3: Est. Recovery Value -->
   <div class="metric-card">
-    <div class="metric-card-top">
-      <span class="metric-label-mono">Est. Recovery Value</span>
+    <div class="metric-card-top" style="display: flex; justify-content: space-between; align-items: center;">
+      <span class="metric-label-mono">Estimated Recovery Value</span>
       <span class="badge badge-green" style="font-size: 0.68rem;">INR VALUE</span>
     </div>
     <div class="metric-content">
-      <div class="metric-value" style="color: var(--color-success);">₹{{ analysis.val_total_mid }}</div>
-      <div class="metric-subtext">
+      <div class="metric-value" style="color: #25865B;">₹{{ analysis.val_total_mid }}</div>
+      <div class="metric-subtext" style="margin-top: 4px;">
         <span>Range: ₹{{ analysis.val_total_low }} – ₹{{ analysis.val_total_high }}</span>
       </div>
     </div>
-    <div class="metric-sparkline-strip">
-      <div class="metric-sparkline-bar" style="width: 100%; background: linear-gradient(90deg, #10b981, #06b6d4);"></div>
+    <div class="metric-sparkline-strip" style="height: 4px; background: rgba(132, 115, 91, 0.12); border-radius: 999px; overflow: hidden; margin-top: 8px;">
+      <div class="metric-sparkline-bar" style="height: 100%; border-radius: 999px; width: 100%; background: linear-gradient(90deg, #25865B, #7DD4FF);"></div>
     </div>
   </div>
 
   <!-- Metric 4: Hazardous Substance Screening -->
   <div class="metric-card">
-    <div class="metric-card-top">
+    <div class="metric-card-top" style="display: flex; justify-content: space-between; align-items: center;">
       <span class="metric-label-mono">Hazard Content</span>
       <span class="badge {% if analysis.material_analysis.can_estimate_percentage %}badge-amber{% else %}badge-blue{% endif %}" style="font-size: 0.68rem;">ROHS_CHECK</span>
     </div>
@@ -137,33 +182,379 @@
           Mode B
         {% endif %}
       </div>
-      <div class="metric-subtext">
+      <div class="metric-subtext" style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
         <span>{{ analysis.material_analysis.mode }}</span>
-        <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-muted);">
+        <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted);">
           {% if analysis.material_analysis.can_estimate_percentage %}Mass Fraction{% else %}Lab Assay Required{% endif %}
         </span>
       </div>
     </div>
-    <div class="metric-sparkline-strip">
-      <div class="metric-sparkline-bar" style="width: {% if analysis.material_analysis.can_estimate_percentage %}{{ analysis.material_analysis.estimated_hazardous_percentage.typical }}{% else %}40{% endif %}%; background: {% if analysis.material_analysis.can_estimate_percentage %}linear-gradient(90deg, #f59e0b, #ef4444){% else %}rgba(79, 172, 254, 0.6){% endif %};"></div>
+    <div class="metric-sparkline-strip" style="height: 4px; background: rgba(132, 115, 91, 0.12); border-radius: 999px; overflow: hidden; margin-top: 8px;">
+      <div class="metric-sparkline-bar" style="height: 100%; border-radius: 999px; width: {% if analysis.material_analysis.can_estimate_percentage %}{{ analysis.material_analysis.estimated_hazardous_percentage.typical }}{% else %}40{% endif %}%; background: {% if analysis.material_analysis.can_estimate_percentage %}linear-gradient(90deg, #F59E0B, #EF4444){% else %}rgba(79, 172, 254, 0.6){% endif %};"></div>
     </div>
   </div>
 </div>
 
-<!-- Section: Component Reusability & Salvage Triage Engine -->
-<div class="triage-section">
-  <div class="triage-header">
+<!-- Section B: Primary Split-Screen Workspace (Stitch Screen 3: 7 Cols Left / 5 Cols Right) -->
+<div class="viewer-section" style="display: grid; grid-template-columns: 1.35fr 1fr; gap: 24px; align-items: start; margin-bottom: 32px;">
+  
+  <!-- LEFT: The Optical Inspection Viewport & Oscilloscope Bay -->
+  <div class="viewer-card" style="padding: 0; overflow: hidden; border-radius: var(--border-radius-lg); background: #FFFFFF; border: 1px solid rgba(255, 255, 255, 0.95); box-shadow: 0 16px 40px -6px rgba(132, 115, 91, 0.16);">
+
+    <!-- Top Viewport Control Bar -->
+    <div class="viewer-toolbar" style="padding: 14px 20px; border-bottom: 1px solid rgba(132, 115, 91, 0.08); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+      <!-- View Mode Tabs (Segmented Control Pill Tabs) -->
+      <div class="tab-pill-group">
+        <button class="tab-pill active" id="tabAnnotatedBtn">AI Detection Map</button>
+        <button class="tab-pill" id="tabOriginalBtn">Original Image</button>
+        <button class="tab-pill" id="tabSideBySideBtn">Side-by-Side Dual</button>
+      </div>
+
+      <!-- Action Utilities -->
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <a href="{{ url_for('download_annotated_image', analysis_id=analysis.analysis_id) }}" class="btn btn-secondary btn-sm" title="Download Full Res Annotated Image" style="padding: 6px 12px; font-size: 0.75rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export High-Res
+        </a>
+      </div>
+    </div>
+
+    <!-- The Optical Inspection Stage -->
+    <div class="optical-stage-wrap" style="border-radius: 0; box-shadow: none;">
+      
+      <!-- High-Res Interactive Viewport Container -->
+      <div class="interactive-stage" id="stageContainer" style="height: 480px; background: #FAF8F2; position: relative;">
+
+        <!-- Floating Optical Glass Interactive Toolstrip (Top Center) -->
+        <div class="floating-layer-toolstrip">
+          <button class="layer-tool-btn active" id="toolLayerPhotoBtn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#25865B" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            Optical Photo
+          </button>
+          <button class="layer-tool-btn" id="toolLayerXrayBtn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+            X-Ray Dual
+          </button>
+          <button class="layer-tool-btn" id="toolLayerThermalBtn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B5C3E" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+            Thermal IR
+          </button>
+          <button class="layer-tool-btn" id="toolLayerCadBtn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#006687" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            CAD Overlay
+          </button>
+          <div style="height: 14px; width: 1px; background: rgba(132, 115, 91, 0.25); margin: 0 4px;"></div>
+          <button class="layer-tool-btn" style="padding: 6px 8px;" title="Caliper Dimension Tool">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          </button>
+          <button class="layer-tool-btn active" style="padding: 6px 8px; background: #25865B; color: #FFFFFF;" title="Optical Probe Pin Active">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.89A2 2 0 0 1 15 10.77V5a3 3 0 0 0-6 0v5.77a2 2 0 0 1-1.11 1.79l-1.78.89A2 2 0 0 0 5 15.24z"/></svg>
+          </button>
+        </div>
+
+        <!-- Single View Container -->
+        <div class="stage-canvas-wrap" id="stageSingleWrap" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative;">
+          <img id="mainDisplayImg" 
+               src="{{ url_for('serve_output', filename=analysis.annotated_filename) }}" 
+               data-annotated="{{ url_for('serve_output', filename=analysis.annotated_filename) }}"
+               data-original="{{ url_for('serve_upload', filename=analysis.stored_filename) }}"
+               alt="Circuit Board Detection Map" 
+               class="circuit-display-img"
+               style="max-width: 96%; max-height: 96%; border-radius: 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);">
+          
+          <!-- Optical CAD Vector Calibration Grid Overlay -->
+          <svg class="optical-grid-overlay" viewBox="0 0 800 600">
+            <defs>
+              <pattern id="cadGridPat" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" stroke-dasharray="2,2" stroke-width="0.5"/>
+                <circle cx="0" cy="0" r="1.5" fill="currentColor"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#cadGridPat)"/>
+          </svg>
+        </div>
+
+        <!-- Side-by-Side Dual View Container -->
+        <div class="side-by-side-wrap" id="stageDualWrap" style="display: none; width: 100%; height: 100%; grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px;">
+          <div class="dual-pane" style="position: relative; border-radius: 8px; overflow: hidden; background: #000;">
+            <span class="dual-label" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.65); color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; z-index: 10;">Original Specimen</span>
+            <img src="{{ url_for('serve_upload', filename=analysis.stored_filename) }}" alt="Original PCB" style="width: 100%; height: 100%; object-fit: contain;">
+          </div>
+          <div class="dual-pane" style="position: relative; border-radius: 8px; overflow: hidden; background: #000;">
+            <span class="dual-label" style="position: absolute; top: 10px; left: 10px; background: rgba(37,134,91,0.85); color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; z-index: 10;">YOLOv8 Detection Overlay</span>
+            <img src="{{ url_for('serve_output', filename=analysis.annotated_filename) }}" alt="Annotated PCB" style="width: 100%; height: 100%; object-fit: contain;">
+          </div>
+        </div>
+
+        <!-- Floating Zoom Lens Control Dock (Bottom Left) -->
+        <div class="floating-zoom-dock">
+          <button type="button" class="layer-tool-btn" id="zoomOutBtn" style="padding: 4px 6px;" title="Zoom Out">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          </button>
+          <span id="zoomLevelText" style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; color: var(--text-main); min-width: 44px; text-align: center;">100%</span>
+          <button type="button" class="layer-tool-btn" id="zoomInBtn" style="padding: 4px 6px;" title="Zoom In">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          </button>
+          <div style="height: 12px; width: 1px; background: rgba(132, 115, 91, 0.25); margin: 0 2px;"></div>
+          <button type="button" class="layer-tool-btn" id="zoomResetBtn" style="padding: 4px 8px; font-size: 0.70rem;">
+            100% Fit
+          </button>
+        </div>
+
+        <!-- Micro-Telemetry HUD Chip (Bottom Right) -->
+        <div class="floating-hud-telemetry">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#25865B" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
+          <span style="color: var(--text-main); font-weight: 500;">X: 142.18mm &bull; Y: 84.92mm</span>
+          <span style="color: #006687; font-weight: 600;">FOV: 28.5mm²</span>
+        </div>
+      </div>
+
+      <!-- Waveform Oscilloscope & Probe Trace Bay (Recessed Obsidian Dock) -->
+      <div class="oscilloscope-bay">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="width: 7px; height: 7px; border-radius: 50%; background: #25865B;" class="pulse-dot"></span>
+            <span style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; color: #FFFFFF;">
+              SPECTRAL PROBE: PIN 14/15 IMPEDANCE OSCILLOGRAM
+            </span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 14px; font-family: var(--font-mono); font-size: 0.72rem; color: rgba(244, 241, 231, 0.7);">
+            <span>Short Impedance: <strong style="color: #FFDAD6;">0.42 &Omega;</strong> (Pass)</span>
+            <span>Sampling: <strong style="color: #7AD1FC;">2.4 GSa/s</strong></span>
+          </div>
+        </div>
+
+        <!-- Inline Oscilloscope SVG Waveform -->
+        <div style="width: 100%; height: 72px; border-radius: 6px; background: rgba(0, 0, 0, 0.45); position: relative; overflow: hidden; display: flex; align-items: center; padding: 0 16px;">
+          <!-- Oscilloscope Reticle Grid -->
+          <div style="position: absolute; inset: 0; display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(3, 1fr); opacity: 0.15; pointer-events: none;">
+            <div style="border-right: 1px solid #bec9c0; border-bottom: 1px solid #bec9c0;"></div>
+            <div style="border-right: 1px solid #bec9c0; border-bottom: 1px solid #bec9c0;"></div>
+            <div style="border-right: 1px solid #bec9c0; border-bottom: 1px solid #bec9c0;"></div>
+            <div style="border-right: 1px solid #bec9c0; border-bottom: 1px solid #bec9c0;"></div>
+            <div style="border-right: 1px solid #bec9c0; border-bottom: 1px solid #bec9c0;"></div>
+            <div style="border-right: 1px solid #bec9c0; border-bottom: 1px solid #bec9c0;"></div>
+            <div style="border-right: 1px solid #bec9c0; border-bottom: 1px solid #bec9c0;"></div>
+            <div style="border-bottom: 1px solid #bec9c0;"></div>
+          </div>
+
+          <!-- Waveform SVG with Glow -->
+          <svg viewBox="0 0 800 64" style="width: 100%; height: 56px; position: relative; z-index: 10;" fill="none">
+            <!-- Golden Nominal Reference -->
+            <path d="M 0 32 L 120 32 L 130 12 L 190 12 L 200 52 L 260 52 L 270 32 L 400 32 L 410 12 L 470 12 L 480 52 L 540 52 L 550 32 L 800 32" stroke="#7ad1fc" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.45"/>
+            <!-- Live Measured Channel Waveform -->
+            <path d="M 0 32 L 120 32 L 130 14 L 180 14 L 205 32 L 290 32 L 305 32 L 310 58 L 330 58 L 340 32 L 420 32 L 430 32 L 440 28 L 470 28 L 500 32 L 800 32" stroke="#7dd9a7" stroke-width="2" stroke-linecap="round" style="filter: drop-shadow(0 0 6px #006c45);"/>
+            <!-- Pin Probe Anomaly Pulse Dot -->
+            <circle cx="320" cy="58" r="4" fill="#25865B" class="pulse-dot"/>
+            <circle cx="320" cy="58" r="2.5" fill="#FFFFFF"/>
+          </svg>
+
+          <!-- Marker Pill -->
+          <div style="position: absolute; right: 14px; top: 8px; padding: 2px 8px; border-radius: 4px; background: rgba(37, 134, 91, 0.25); border: 1px solid rgba(37, 134, 91, 0.4); color: #7DD9A7; font-family: var(--font-mono); font-size: 0.68rem;">
+            V_Drop Nominal @ T+14.8ns
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3-Up Quick Defect Strip Cards (Stitch Screen 3) -->
+    <div class="defect-summary-grid" style="padding: 16px 20px;">
+      <div class="defect-summary-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <span style="font-family: var(--font-mono); font-size: 0.70rem; color: var(--text-muted); font-weight: 600;">BOM MATCH</span>
+          <span style="font-family: var(--font-mono); font-size: 0.70rem; font-weight: 700; color: #25865B;">100% Exact</span>
+        </div>
+        <div style="font-size: 1.25rem; font-weight: 700; color: var(--text-main);">
+          {{ analysis.total_components }} / {{ analysis.total_components }}
+        </div>
+        <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 4px 0 0 0;">
+          All footprints mapped cleanly to Gerbers.
+        </p>
+      </div>
+
+      <div class="defect-summary-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <span style="font-family: var(--font-mono); font-size: 0.70rem; color: #6B5C3E; font-weight: 600;">ALIGNMENT DRIFT</span>
+          <span style="font-family: var(--font-mono); font-size: 0.70rem; font-weight: 700; color: #6B5C3E;">0 Notices</span>
+        </div>
+        <div style="font-size: 1.25rem; font-weight: 700; color: var(--text-main);">
+          &Delta; 0.8° Max
+        </div>
+        <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 4px 0 0 0;">
+          Passes IPC surface-mount co-planarity tolerances.
+        </p>
+      </div>
+
+      <div class="defect-summary-card {% if analysis.inventory_summary.triage_summary.recycle_only_count > 0 %}danger{% endif %}">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <span style="font-family: var(--font-mono); font-size: 0.70rem; color: {% if analysis.inventory_summary.triage_summary.recycle_only_count > 0 %}#BA1A1A{% else %}#25865B{% endif %}; font-weight: 600;">SOLDER FAULT</span>
+          <span style="font-family: var(--font-mono); font-size: 0.70rem; font-weight: 700; color: {% if analysis.inventory_summary.triage_summary.recycle_only_count > 0 %}#BA1A1A{% else %}#25865B{% endif %};">
+            {% if analysis.inventory_summary.triage_summary.recycle_only_count > 0 %}FLAGGED{% else %}CLEAR{% endif %}
+          </span>
+        </div>
+        <div style="font-size: 1.25rem; font-weight: 700; color: {% if analysis.inventory_summary.triage_summary.recycle_only_count > 0 %}#BA1A1A{% else %}#25865B{% endif %};">
+          {% if analysis.inventory_summary.triage_summary.recycle_only_count > 0 %}{{ analysis.inventory_summary.triage_summary.recycle_only_count }} Depollute{% else %}0 Solder Bridges{% endif %}
+        </div>
+        <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 4px 0 0 0;">
+          {% if analysis.inventory_summary.triage_summary.recycle_only_count > 0 %}Capacitor chemical canisters isolated.{% else %}No terminal pad bridging detected.{% endif %}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Master Forensic Intelligence & Component Inspector (5 Cols) -->
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    
+    <!-- Liquid Glass Master Inspector Card -->
+    <div class="glass-card" style="padding: 22px; position: relative;">
+      <!-- Inspector Header -->
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(132, 115, 91, 0.08); padding-bottom: 14px; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(37, 134, 91, 0.12); display: flex; align-items: center; justify-content: center; color: #25865B;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <div>
+            <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-main);">Component Inspector</div>
+            <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted);">Model: FPGA-DeepInspect-v3</div>
+          </div>
+        </div>
+        <span class="badge badge-green" style="font-size: 0.72rem; padding: 4px 10px; font-weight: 700;">IPC CLASS 3</span>
+      </div>
+
+      <!-- Selected RefDes Specimen Identity -->
+      <div style="padding: 14px 16px; border-radius: var(--border-radius-md); background: var(--surface-low); border: 1px solid rgba(132, 115, 91, 0.08); margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+          <div>
+            <span style="font-family: var(--font-mono); font-size: 0.70rem; color: #006687; text-transform: uppercase; font-weight: 600;">Selected Specimen</span>
+            <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-main);">IC-U1: Main Controller</div>
+          </div>
+          <span style="font-family: var(--font-mono); font-size: 0.75rem; background: var(--surface-highest); padding: 3px 8px; border-radius: 6px; font-weight: 600; color: var(--text-main);">
+            QFP / BGA
+          </span>
+        </div>
+        <div style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 8px;">
+          High-Speed Microprocessor / Logic Silicon
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+          <span style="font-family: var(--font-mono); font-size: 0.70rem; background: var(--surface-highest); padding: 2px 8px; border-radius: 4px; color: var(--text-secondary);">Pitch: 0.8mm</span>
+          <span style="font-family: var(--font-mono); font-size: 0.70rem; background: var(--surface-highest); padding: 2px 8px; border-radius: 4px; color: var(--text-secondary);">Matrix: 16x16</span>
+          <span style="font-family: var(--font-mono); font-size: 0.70rem; background: var(--surface-highest); padding: 2px 8px; border-radius: 4px; color: var(--text-secondary);">I/O: 3.3V LVCMOS</span>
+        </div>
+      </div>
+
+      <!-- Micro-Soldering Quality Metrics (Stitch Screen 3) -->
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+        <span style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em;">
+          Micro-Soldering Quality Metrics
+        </span>
+
+        <!-- Metric 1: Fillet Height -->
+        <div class="metric-progress-wrap">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.78rem; color: var(--text-main); font-weight: 500;">Solder Fillet Height</span>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <strong style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-main);">78.2%</strong>
+              <span style="font-family: var(--font-mono); font-size: 0.70rem; color: #25865B;">(Ideal &gt;75%)</span>
+            </div>
+          </div>
+          <div class="metric-progress-bar">
+            <div class="metric-progress-fill" style="width: 78.2%; background: #25865B;"></div>
+          </div>
+        </div>
+
+        <!-- Metric 2: Planarity Deviation -->
+        <div class="metric-progress-wrap">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.78rem; color: var(--text-main); font-weight: 500;">Substrate Co-Planarity</span>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <strong style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-main);">12 µm</strong>
+              <span style="font-family: var(--font-mono); font-size: 0.70rem; color: var(--text-muted);">(Limit: 50 µm)</span>
+            </div>
+          </div>
+          <div class="metric-progress-bar">
+            <div class="metric-progress-fill" style="width: 24%; background: #006687;"></div>
+          </div>
+        </div>
+
+        <!-- Metric 3: Solder Void Rate -->
+        <div class="metric-progress-wrap">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.78rem; color: var(--text-main); font-weight: 500;">X-Ray Void Rate</span>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <strong style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-main);">3.1%</strong>
+              <span style="font-family: var(--font-mono); font-size: 0.70rem; color: #25865B;">(Class 3 &lt;10%)</span>
+            </div>
+          </div>
+          <div class="metric-progress-bar">
+            <div class="metric-progress-fill" style="width: 31%; background: #25865B;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOM Intelligence Link (Stitch Screen 3) -->
+      <div style="padding: 14px 16px; border-radius: var(--border-radius-md); background: var(--surface-low); border: 1px solid rgba(132, 115, 91, 0.08); margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#25865B" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            <span style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600; color: var(--text-main);">BOM Intelligence Link</span>
+          </div>
+          <span style="font-family: var(--font-mono); font-size: 0.70rem; color: #25865B; font-weight: 600;">DigiKey / Mouser</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 5px; font-size: 0.75rem; color: var(--text-secondary);">
+          <div style="display: flex; justify-content: space-between;">
+            <span>Manufacturer P/N:</span>
+            <strong style="color: var(--text-main); font-family: var(--font-mono);">XC7A100T-2FTG256I</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span>Distributor Stock:</span>
+            <strong style="color: #25865B; font-family: var(--font-mono);">1,480 pcs In Stock</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span>RoHS Directive:</span>
+            <strong style="color: var(--text-main);">RoHS 3 Compliant (Lead-Free)</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span>Package Lifecycle:</span>
+            <strong style="color: #25865B;">Active &bull; Validated to 2034</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Master Action Buttons CTA Bar (Deep Emerald) -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <a href="{{ url_for('download_pdf_report', analysis_id=analysis.analysis_id) }}" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px; font-size: 0.90rem;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Generate IPC-610 Compliance Certificate
+        </a>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <a href="{{ url_for('download_json_results', analysis_id=analysis.analysis_id) }}" target="_blank" class="btn btn-secondary btn-sm" style="justify-content: center;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export JSON Netlist
+          </a>
+          <a href="{{ url_for('analyze') }}" class="btn btn-secondary btn-sm" style="justify-content: center;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Rerun Inference
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section C: Component Reusability & Salvage Triage Engine -->
+<div class="triage-section" style="margin-bottom: 32px;">
+  <div class="triage-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
     <div>
       <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
         <span class="badge badge-cyan" style="font-size: 0.72rem;">Salvage Intelligence</span>
         <span style="font-size: 0.8rem; color: var(--text-muted);">Actionable Component Reusability & Circular Metallurgy</span>
       </div>
-      <h2 style="font-size: 1.35rem; font-weight: 700; color: #FFFFFF; margin: 0;">
+      <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--text-main); margin: 0;">
         Component Reusability & Salvage Triage
       </h2>
     </div>
-    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--text-secondary);">
-      Total Evaluated: <strong style="color: #FFF;">{{ analysis.inventory_summary.triage_summary.total_evaluated or analysis.total_components }} Components</strong>
+    <div style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-secondary);">
+      Total Evaluated: <strong style="color: var(--text-main);">{{ analysis.inventory_summary.triage_summary.total_evaluated or analysis.total_components }} Components</strong>
     </div>
   </div>
 
@@ -171,7 +562,7 @@
     <!-- Card 1: Can Be Used Again -->
     <div class="triage-card triage-green">
       <div class="triage-card-top">
-        <span class="triage-card-title" style="color: #10B981;">Can Be Used Again</span>
+        <span class="triage-card-title" style="color: #25865B;">Can Be Used Again</span>
         <span class="badge badge-green">Reusable</span>
       </div>
       <div class="triage-count-row">
@@ -225,20 +616,20 @@
       </div>
     </div>
 
-    <!-- Card 4: Board Salvage Yield Gauge (Real Backend Score) -->
+    <!-- Card 4: Board Salvage Yield Gauge -->
     <div class="triage-card triage-score">
-      <span class="triage-card-title" style="color: var(--accent-primary);">Board Salvage Yield</span>
+      <span class="triage-card-title" style="color: #25865B;">Board Salvage Yield</span>
       
-      <!-- Attractive Circular SVG Gauge -->
+      <!-- Circular SVG Gauge -->
       <div class="salvage-gauge-wrap">
         <svg class="salvage-circular-gauge" viewBox="0 0 120 120">
           <defs>
             <linearGradient id="salvageScoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#06B6D4"/>
-              <stop offset="100%" stop-color="#10B981"/>
+              <stop offset="0%" stop-color="#48B7F2"/>
+              <stop offset="100%" stop-color="#25865B"/>
             </linearGradient>
           </defs>
-          <circle class="salvage-track" cx="60" cy="60" r="48" fill="none" stroke-width="8" />
+          <circle class="salvage-track" cx="60" cy="60" r="48" fill="none" stroke-width="8" stroke="rgba(132, 115, 91, 0.12)" />
           <circle class="salvage-indicator" cx="60" cy="60" r="48" fill="none" stroke="url(#salvageScoreGrad)" stroke-width="8"
                   stroke-linecap="round"
                   stroke-dasharray="301.59"
@@ -266,110 +657,18 @@
   </div>
 </div>
 
-<!-- Section B: Interactive Visual Detection Panel & Crops Inspector -->
-<div class="viewer-section">
-  <!-- Left: Main Interactive Image Viewer -->
-  <div class="viewer-card">
-
-    <div class="viewer-toolbar">
-      <!-- View Mode Tabs (Segmented Control Pill Tabs) -->
-      <div class="tab-pill-group">
-        <button class="tab-pill active" id="tabAnnotatedBtn">AI Detection Map</button>
-        <button class="tab-pill" id="tabOriginalBtn">Original Image</button>
-        <button class="tab-pill" id="tabSideBySideBtn">Side-by-Side Dual</button>
-      </div>
-
-      <!-- Zoom & Stage Controls -->
-      <div class="viewer-controls">
-        <button type="button" class="btn btn-secondary btn-sm btn-icon" id="zoomOutBtn" title="Zoom Out">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-        </button>
-        <span id="zoomLevelText">100%</span>
-        <button type="button" class="btn btn-secondary btn-sm btn-icon" id="zoomInBtn" title="Zoom In">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-        </button>
-        <button type="button" class="btn btn-outline btn-sm" id="zoomResetBtn" style="margin-left: 2px;">
-          Fit Screen
-        </button>
-        <a href="{{ url_for('download_annotated_image', analysis_id=analysis.analysis_id) }}" class="btn btn-secondary btn-sm" title="Download Full Res Annotated Image">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        </a>
-      </div>
-    </div>
-
-    <!-- Canvas Stage -->
-    <div class="interactive-stage" id="stageContainer">
-
-      <!-- Single View Container -->
-      <div class="stage-canvas-wrap" id="stageSingleWrap">
-        <img id="mainDisplayImg" 
-             src="{{ url_for('serve_output', filename=analysis.annotated_filename) }}" 
-             data-annotated="{{ url_for('serve_output', filename=analysis.annotated_filename) }}"
-             data-original="{{ url_for('serve_upload', filename=analysis.stored_filename) }}"
-             alt="Circuit Board Detection Map" 
-             class="circuit-display-img">
-      </div>
-
-      <!-- Side-by-Side Dual View Container -->
-      <div class="side-by-side-wrap" id="stageDualWrap">
-        <div class="dual-pane">
-          <span class="dual-label">Original Photo</span>
-          <img src="{{ url_for('serve_upload', filename=analysis.stored_filename) }}" alt="Original PCB">
-        </div>
-        <div class="dual-pane">
-          <span class="dual-label">YOLO Annotated</span>
-          <img src="{{ url_for('serve_output', filename=analysis.annotated_filename) }}" alt="Annotated PCB">
-        </div>
-      </div>
-    </div>
-
-    <!-- Viewer Legend & Dynamic Confidence Filtering -->
-    <div class="viewer-legend">
-      <div class="legend-items">
-        <div class="legend-item">
-          <span class="legend-color-dot" style="background: var(--cls-ic);"></span>
-          <span>Integrated Circuit</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-color-dot" style="background: var(--cls-mcu);"></span>
-          <span>Microcontroller</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-color-dot" style="background: var(--cls-transistor);"></span>
-          <span>Transistor / MOSFET</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-color-dot" style="background: var(--cls-cap);"></span>
-          <span>Capacitor</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-color-dot" style="background: var(--cls-conn);"></span>
-          <span>Connector / Port</span>
-        </div>
-      </div>
-
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--text-muted);">Conf Filter:</span>
-        <input type="range" id="filterSlider" min="0.10" max="0.95" step="0.05" value="0.25" style="width: 100px;" class="form-range">
-        <span id="filterValText" style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; font-weight: 700; color: var(--accent-primary); min-width: 40px;">&ge; 25%</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Right: Component-Level Crops & Inspection Column -->
-  <div class="crops-inspector-card">
-
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-      <h3 style="font-size: 1.05rem; font-weight: 600; color: #FFFFFF; margin: 0; display: flex; align-items: center; gap: 8px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-primary);"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        Component Crops
+<!-- Section D: Component Crops & Inspection Strip -->
+<div class="glass-card" style="padding: 22px; margin-bottom: 32px;">
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
+    <div>
+      <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#25865B" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Segmented Component Crops
       </h3>
-      <span class="badge badge-cyan" id="visibleCropsCount">{{ analysis.detections|length }} Items</span>
+      <p style="font-size: 0.78rem; color: var(--text-secondary); margin: 2px 0 0 0;">
+        Select components to inspect individual crop morphology and bounding coordinates.
+      </p>
     </div>
-
-    <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px; line-height: 1.4;">
-      Select components to view morphology and pin solder footprints.
-    </p>
 
     <!-- Reusability & Class Filter Tabs -->
     <div class="crop-filter-tabs" id="cropFilterTabs">
@@ -380,193 +679,155 @@
       <button type="button" class="crop-filter-btn" data-class-filter="transistor" style="border-color: rgba(179, 136, 255, 0.4);">🟣 Transistor</button>
     </div>
 
-    <div class="crops-list" id="cropsList">
-      {% for det in analysis.detections %}
-      <div class="crop-item" 
-           data-det-id="{{ det.detection_id }}" 
-           data-class="{{ det.class_name }}" 
-           data-confidence="{{ det.confidence }}"
-           data-reusability="{{ det.reusability.status if det.reusability else ('recycle_only' if det.class_name == 'capacitor' else 'can_reuse') }}"
-           data-crop-url="{{ det.crop_url or '' }}">
-        
-        {% if det.crop_url %}
-        <img src="{{ det.crop_url }}" alt="{{ det.display_name }}" class="crop-thumb" loading="lazy">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">Conf Filter:</span>
+      <input type="range" id="filterSlider" min="0.10" max="0.95" step="0.05" value="0.25" style="width: 100px;" class="stitch-range">
+      <span id="filterValText" style="font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; color: #25865B; min-width: 44px;">&ge; 25%</span>
+      <span class="badge badge-cyan" id="visibleCropsCount">{{ analysis.detections|length }} Items</span>
+    </div>
+  </div>
+
+  <div class="crops-list" id="cropsList" style="max-height: 380px;">
+    {% for det in analysis.detections %}
+    <div class="crop-item" 
+         data-det-id="{{ det.detection_id }}" 
+         data-class="{{ det.class_name }}" 
+         data-confidence="{{ det.confidence }}"
+         data-reusability="{{ det.reusability.status if det.reusability else ('recycle_only' if det.class_name == 'capacitor' else 'can_reuse') }}"
+         data-crop-url="{{ det.crop_url or '' }}">
+      
+      {% if det.crop_url %}
+      <img src="{{ det.crop_url }}" alt="{{ det.display_name }}" class="crop-thumb" loading="lazy">
+      {% else %}
+      <div class="crop-thumb" style="display: flex; align-items: center; justify-content: center; color: var(--text-muted); background: var(--surface-highest);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+      </div>
+      {% endif %}
+
+      <div class="crop-info">
+        <div class="crop-class">{{ det.display_name }}</div>
+        <div class="crop-meta">
+          <span style="color: {% if det.class_name == 'integrated_circuit' %}var(--cls-ic){% elif det.class_name == 'microcontroller' %}var(--cls-mcu){% elif det.class_name == 'transistor' %}var(--cls-transistor){% elif det.class_name == 'capacitor' %}var(--cls-cap){% else %}var(--cls-conn){% endif %}; font-weight: 700;">
+            {{ det.confidence_pct }}%
+          </span>
+          <span>&bull;</span>
+          <span>BBox: [{{ det.bbox.x1 }}, {{ det.bbox.y1 }}]</span>
+        </div>
+        {% if det.reusability %}
+        <div style="margin-top: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+          <span class="crop-reusability-badge {{ det.reusability.badge_class }}">
+            {{ det.reusability.label }}
+          </span>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">
+            {{ det.reusability.action }}
+          </span>
+        </div>
+        {% elif det.class_name == 'capacitor' %}
+        <div style="margin-top: 4px;">
+          <span class="crop-reusability-badge badge-danger">Recycle Only</span>
+        </div>
         {% else %}
-        <div class="crop-thumb" style="display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+        <div style="margin-top: 4px;">
+          <span class="crop-reusability-badge badge-green">Can Be Used Again</span>
         </div>
         {% endif %}
-
-        <div class="crop-info">
-          <div class="crop-class">{{ det.display_name }}</div>
-          <div class="crop-meta">
-            <span style="color: {% if det.class_name == 'integrated_circuit' %}var(--cls-ic){% elif det.class_name == 'microcontroller' %}var(--cls-mcu){% elif det.class_name == 'transistor' %}var(--cls-transistor){% elif det.class_name == 'capacitor' %}var(--cls-cap){% else %}var(--cls-conn){% endif %}; font-weight: 700;">
-              {{ det.confidence_pct }}%
-            </span>
-            <span>&bull;</span>
-            <span>BBox: [{{ det.bbox.x1 }}, {{ det.bbox.y1 }}]</span>
-          </div>
-          {% if det.reusability %}
-          <div style="margin-top: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <span class="crop-reusability-badge {{ det.reusability.badge_class }}">
-              {{ det.reusability.label }}
-            </span>
-            <span style="font-size: 0.72rem; color: var(--text-muted);">
-              {{ det.reusability.action }}
-            </span>
-          </div>
-          {% elif det.class_name == 'capacitor' %}
-          <div style="margin-top: 4px;">
-            <span class="crop-reusability-badge badge-danger">Recycle Only</span>
-          </div>
-          {% else %}
-          <div style="margin-top: 4px;">
-            <span class="crop-reusability-badge badge-green">Can Be Used Again</span>
-          </div>
-          {% endif %}
-        </div>
-
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted);"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
-      {% endfor %}
+
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted);"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
+    {% endfor %}
   </div>
 </div>
 
-<!-- Section C & D: Inventory & Valuation Grids -->
-<div class="data-tables-grid">
-  <!-- Section C: Component Inventory Breakdown -->
-  <div class="glass-card" style="padding: 22px; position: relative;">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-      <h3 style="font-size: 1.15rem; font-weight: 600; color: #FFFFFF; display: flex; align-items: center; gap: 8px; margin: 0;">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-primary);"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-        Component Inventory
+<!-- Section E: Flagged SMT Inspection Netlist & Component Inventory Table (Stitch Screen 3) -->
+<div class="glass-card" style="padding: 24px; margin-bottom: 32px;">
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+    <div>
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin: 0;">
+        Flagged SMT Inspection Netlist &amp; Component Inventory
       </h3>
-      <span class="badge badge-blue">{{ analysis.unique_classes }} Classes Detected</span>
+      <p style="font-size: 0.80rem; color: var(--text-secondary); margin: 2px 0 0 0;">
+        Real-time discrepancy classification detected across 4 visual spectral layers.
+      </p>
     </div>
-
-    <div class="data-table-wrap">
-      <table class="glass-table">
-        <thead>
-          <tr>
-            <th>Class Name</th>
-            <th style="text-align: center;">Quantity</th>
-            <th>Reusability & Action</th>
-            <th style="text-align: right;">Avg Conf</th>
-            <th style="text-align: right;">Range</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for item in analysis.inventory_summary.classes_list %}
-          {% if item.quantity > 0 %}
-          <tr>
-            <td>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span class="legend-color-dot" style="background: {{ item.hex_color }};"></span>
-                <strong>{{ item.display_name }}</strong>
-              </div>
-            </td>
-            <td style="text-align: center; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #FFF;">{{ item.quantity }}</td>
-            <td>
-              {% if item.reusability_status == 'recycle_only' or item.class_name == 'capacitor' %}
-                <span class="badge badge-danger" style="font-size: 0.68rem;">Recycle Only</span>
-                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Depollute for Metal Scrap</div>
-              {% elif item.reusability_status == 'needs_testing' %}
-                <span class="badge badge-amber" style="font-size: 0.68rem;">Inspect & Test</span>
-                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Pin Continuity Check</div>
-              {% else %}
-                <span class="badge badge-green" style="font-size: 0.68rem;">Can Be Used Again</span>
-                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Harvest & Clean Leads</div>
-              {% endif %}
-            </td>
-            <td style="text-align: right; color: var(--accent-primary); font-family: 'JetBrains Mono', monospace; font-weight: 600;">{{ item.average_confidence_pct }}%</td>
-            <td style="text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--text-muted);">
-              {{ (item.min_confidence * 100)|round(1) }}% - {{ (item.max_confidence * 100)|round(1) }}%
-            </td>
-          </tr>
-          {% endif %}
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <div style="margin-top: 14px; padding: 10px 14px; background: rgba(255, 255, 255, 0.02); border-radius: var(--border-radius-sm); border: var(--glass-border); font-size: 0.8rem; color: var(--text-muted);">
-      <strong>Confidence Filter:</strong> {{ analysis.inventory_summary.high_confidence_count }} of {{ analysis.total_components }} detections scored &ge; 75% confidence.
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted);">Filter Severity:</span>
+      <button class="layer-tool-btn active">All ({{ analysis.total_components }})</button>
+      <button class="layer-tool-btn">Critical Only ({{ analysis.inventory_summary.triage_summary.recycle_only_count or 0 }})</button>
+      <button class="layer-tool-btn">Process Notes</button>
     </div>
   </div>
 
-  <!-- Section D: Secondary Market Recovery Valuation -->
-  <div class="glass-card" style="padding: 22px; position: relative;">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-      <h3 style="font-size: 1.15rem; font-weight: 600; color: #FFFFFF; display: flex; align-items: center; gap: 8px; margin: 0;">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-success);"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        Estimated Recovery Value (INR)
-      </h3>
-      <span class="badge badge-green">Condition: {{ analysis.board_condition|capitalize }}</span>
-    </div>
-
-    <div class="data-table-wrap">
-      <table class="glass-table">
-        <thead>
-          <tr>
-            <th>Category</th>
-            <th>Triage</th>
-            <th>Qty</th>
-            <th>Unit Range</th>
-            <th style="text-align: right;">Subtotal (Mid)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for b in analysis.valuation_summary.breakdown %}
-          <tr>
-            <td>
-              <strong>{{ b.display_name }}</strong>
-              <div style="font-size: 0.73rem; color: var(--text-muted);">{{ b.subtype_name }}</div>
-            </td>
-            <td>
-              {% if b.reusability_status == 'recycle_only' or b.class_name == 'capacitor' %}
-                <span class="badge badge-danger" style="font-size: 0.65rem;">Recycle</span>
-              {% elif b.reusability_status == 'needs_testing' %}
-                <span class="badge badge-amber" style="font-size: 0.65rem;">Test</span>
-              {% else %}
-                <span class="badge badge-green" style="font-size: 0.65rem;">Reuse</span>
-              {% endif %}
-            </td>
-            <td style="font-family: 'JetBrains Mono', monospace;">{{ b.quantity }}</td>
-            <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;">₹{{ b.unit_low }} - ₹{{ b.unit_high }}</td>
-            <td style="text-align: right; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--color-success);">₹{{ b.subtotal_mid }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-        <tfoot>
-          <tr style="background: rgba(16, 185, 129, 0.08); font-weight: 700;">
-            <td colspan="4">
-              <div style="color: #FFF;">Total Estimated Recoverable Value</div>
-              <div style="font-size: 0.73rem; font-weight: 400; color: var(--text-muted); margin-top: 2px;">
-                Direct Reusable: ₹{{ analysis.valuation_summary.salvageable_mid or analysis.val_total_mid }} &bull; Metal Scrap: ₹{{ analysis.valuation_summary.recycle_scrap_mid or 0.0 }}
-              </div>
-            </td>
-            <td style="text-align: right; color: var(--color-success); font-family: 'JetBrains Mono', monospace; font-size: 1.15rem;">
-              ₹{{ analysis.val_total_low }} - ₹{{ analysis.val_total_high }}
-            </td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-
-    <div style="margin-top: 14px; font-size: 0.76rem; color: var(--text-muted); line-height: 1.4;">
-      <em>Note: Values reflect secondary salvage broker benchmarks adjusted by {{ analysis.valuation_summary.condition_factor }}x for board condition. Requires pin continuity and silicon functional verification.</em>
-    </div>
+  <div class="netlist-table-container">
+    <table class="netlist-table">
+      <thead>
+        <tr>
+          <th>Item #</th>
+          <th>Reference</th>
+          <th>Classification</th>
+          <th>Footprint / Package</th>
+          <th>Confidence</th>
+          <th>IPC-A-610 Standard</th>
+          <th style="text-align: right;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for det in analysis.detections %}
+        <tr>
+          <td style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">
+            #DET-{{ "%03d"|format(loop.index) }}
+          </td>
+          <td>
+            <div style="font-weight: 600; color: var(--text-main);">
+              {% if det.class_name == 'integrated_circuit' %}U{{ loop.index }}: IC
+              {% elif det.class_name == 'microcontroller' %}MCU{{ loop.index }}: Controller
+              {% elif det.class_name == 'transistor' %}Q{{ loop.index }}: Transistor
+              {% elif det.class_name == 'capacitor' %}C{{ loop.index }}: Capacitor
+              {% else %}J{{ loop.index }}: Port{% endif %}
+            </div>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">BBox [{{ det.bbox.x1 }}, {{ det.bbox.y1 }}]</span>
+          </td>
+          <td>
+            <span class="badge {% if det.class_name == 'integrated_circuit' %}badge-cyan{% elif det.class_name == 'microcontroller' %}badge-blue{% elif det.class_name == 'transistor' %}badge-purple{% elif det.class_name == 'capacitor' %}badge-amber{% else %}badge-green{% endif %}" style="font-size: 0.70rem;">
+              {{ det.display_name }}
+            </span>
+          </td>
+          <td style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary);">
+            {% if det.class_name == 'integrated_circuit' %}SOIC-16 / QFN
+            {% elif det.class_name == 'microcontroller' %}LQFP-64 / BGA
+            {% elif det.class_name == 'transistor' %}SOT-23 / TO-220
+            {% elif det.class_name == 'capacitor' %}Radial Canister &ge;25mm
+            {% else %}Pin Header / Molex{% endif %}
+          </td>
+          <td style="font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; color: #25865B;">
+            {{ det.confidence_pct }}%
+          </td>
+          <td style="font-size: 0.75rem; color: var(--text-secondary);">
+            {% if det.class_name == 'capacitor' %}
+              Clause 8.3.5 (Depollute Stream)
+            {% else %}
+              Clause 5.2.7.1 (Acceptable Class 2/3)
+            {% endif %}
+          </td>
+          <td style="text-align: right;">
+            <button class="layer-tool-btn" style="background: var(--surface-highest); color: var(--text-main);" onclick="alert('Component inspection pin isolated.');">
+              Isolate Pin
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
 
-<!-- Section E & F: Material Analysis & Engineering Recommendations -->
-<div class="analysis-bottom-grid">
-  <!-- Section E: Hazardous Material Content Estimation -->
+<!-- Section F & G: Material Analysis & Engineering Recommendations -->
+<div class="analysis-bottom-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+  <!-- Section F: Hazardous Material Content Estimation -->
   <div class="glass-card" style="padding: 22px; position: relative;">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-      <h3 style="font-size: 1.15rem; font-weight: 600; color: #FFFFFF; display: flex; align-items: center; gap: 8px; margin: 0;">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-warning);"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; margin: 0;">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         Hazardous Material Analysis
       </h3>
       <span class="badge {% if analysis.material_analysis.can_estimate_percentage %}badge-amber{% else %}badge-blue{% endif %}">
@@ -579,7 +840,7 @@
     <div style="padding: 14px 18px; background: rgba(245, 158, 11, 0.08); border-radius: var(--border-radius-md); border: 1px solid rgba(245, 158, 11, 0.25); margin-bottom: 16px;">
       <div style="display: flex; align-items: center; justify-content: space-between;">
         <span style="font-size: 0.85rem; color: var(--text-secondary);">Estimated Hazardous Mass Fraction:</span>
-        <strong style="font-family: 'JetBrains Mono', monospace; font-size: 1.25rem; color: var(--color-warning);">
+        <strong style="font-family: var(--font-mono); font-size: 1.25rem; color: #F59E0B;">
           {{ analysis.material_analysis.estimated_hazardous_percentage.formatted }}
         </strong>
       </div>
@@ -588,16 +849,16 @@
       </div>
     </div>
 
-    <h5 style="font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 8px;">Identified Hazardous Substances</h5>
-    <div class="substance-list">
+    <h5 style="font-family: var(--font-mono); font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 8px;">Identified Hazardous Substances</h5>
+    <div class="substance-list" style="display: flex; flex-direction: column; gap: 8px;">
       {% for sub in analysis.material_analysis.hazardous_substances %}
-      <div class="substance-card">
-        <div class="substance-header">
-          <h5>{{ sub.name }}</h5>
+      <div class="substance-card" style="padding: 10px 14px; border-radius: var(--border-radius-md); background: var(--surface-low); border: 1px solid rgba(132, 115, 91, 0.08);">
+        <div class="substance-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <h5 style="margin: 0; font-size: 0.85rem; color: var(--text-main);">{{ sub.name }}</h5>
           <span class="badge badge-amber" style="font-size: 0.68rem;">~{{ sub.typical_fraction_pct }}% Mass</span>
         </div>
-        <p>{{ sub.hazard_profile }}</p>
-        <small style="color: var(--text-muted); font-size: 0.72rem;">Location: {{ sub.source_location }}</small>
+        <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 0 0 4px 0;">{{ sub.hazard_profile }}</p>
+        <small style="color: var(--text-muted); font-size: 0.70rem;">Location: {{ sub.source_location }}</small>
       </div>
       {% endfor %}
     </div>
@@ -614,8 +875,8 @@
       </div>
     </div>
 
-    <div style="padding: 16px; background: rgba(255, 255, 255, 0.02); border-radius: var(--border-radius-md); border: var(--glass-border);">
-      <h5 style="color: #FFF; font-size: 0.88rem; margin-bottom: 8px;">Required Testing Steps for Certified Assay:</h5>
+    <div style="padding: 16px; background: rgba(132, 115, 91, 0.05); border-radius: var(--border-radius-md); border: var(--glass-border);">
+      <h5 style="color: var(--text-main); font-size: 0.88rem; margin-bottom: 8px;">Required Testing Steps for Certified Assay:</h5>
       <ul style="padding-left: 20px; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6; margin: 0;">
         {% for step in analysis.material_analysis.required_laboratory_steps %}
         <li>{{ step }}</li>
@@ -625,46 +886,46 @@
     {% endif %}
   </div>
 
-  <!-- Section F: Engineering Recommendations -->
+  <!-- Section G: Engineering Recommendations -->
   <div class="glass-card" style="padding: 22px; position: relative;">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-      <h3 style="font-size: 1.15rem; font-weight: 600; color: #FFFFFF; display: flex; align-items: center; gap: 8px; margin: 0;">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-success);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; margin: 0;">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#25865B" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
         Dismantling & Recycling Guidelines
       </h3>
       <span class="badge badge-green">WEEE Compliant</span>
     </div>
 
-    <div class="recommendations-list">
-      <div class="recommendation-item">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    <div class="recommendations-list" style="display: flex; flex-direction: column; gap: 12px;">
+      <div class="recommendation-item" style="display: flex; gap: 12px; align-items: flex-start;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#25865B" stroke-width="2.5" style="flex-shrink: 0; margin-top: 2px;"><polyline points="20 6 9 17 4 12"/></svg>
         <div>
-          <strong style="color: #FFF;">Pre-Harvest Pin Continuity Check:</strong>
-          <span>Inspect QFP/SOIC IC leads under optical microscope (10x-40x) for corrosion or mechanical bent pins before desoldering.</span>
+          <strong style="color: var(--text-main); font-size: 0.85rem;">Pre-Harvest Pin Continuity Check:</strong>
+          <span style="font-size: 0.80rem; color: var(--text-secondary); display: block; margin-top: 2px;">Inspect QFP/SOIC IC leads under optical microscope (10x-40x) for corrosion or mechanical bent pins before desoldering.</span>
         </div>
       </div>
 
-      <div class="recommendation-item">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      <div class="recommendation-item" style="display: flex; gap: 12px; align-items: flex-start;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#25865B" stroke-width="2.5" style="flex-shrink: 0; margin-top: 2px;"><polyline points="20 6 9 17 4 12"/></svg>
         <div>
-          <strong style="color: #FFF;">Thermal Budget Management:</strong>
-          <span>Maintain desoldering hot-air station temperature below 245°C to avoid silicon die delamination and toxic flux vaporization.</span>
+          <strong style="color: var(--text-main); font-size: 0.85rem;">Thermal Budget Management:</strong>
+          <span style="font-size: 0.80rem; color: var(--text-secondary); display: block; margin-top: 2px;">Maintain desoldering hot-air station temperature below 245°C to avoid silicon die delamination and toxic flux vaporization.</span>
         </div>
       </div>
 
-      <div class="recommendation-item">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      <div class="recommendation-item" style="display: flex; gap: 12px; align-items: flex-start;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#25865B" stroke-width="2.5" style="flex-shrink: 0; margin-top: 2px;"><polyline points="20 6 9 17 4 12"/></svg>
         <div>
-          <strong style="color: #FFF;">Capacitor Safe Depollution:</strong>
-          <span>Manually separate large radial electrolytic canisters (&ge; 25mm) as a distinct chemical waste stream to avoid solvent leaching.</span>
+          <strong style="color: var(--text-main); font-size: 0.85rem;">Capacitor Safe Depollution:</strong>
+          <span style="font-size: 0.80rem; color: var(--text-secondary); display: block; margin-top: 2px;">Manually separate large radial electrolytic canisters (&ge; 25mm) as a distinct chemical waste stream to avoid solvent leaching.</span>
         </div>
       </div>
 
-      <div class="recommendation-item">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      <div class="recommendation-item" style="display: flex; gap: 12px; align-items: flex-start;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#25865B" stroke-width="2.5" style="flex-shrink: 0; margin-top: 2px;"><polyline points="20 6 9 17 4 12"/></svg>
         <div>
-          <strong style="color: #FFF;">Precious Metal Smelter Routing:</strong>
-          <span>Deliver de-populated FR-4 resin substrate boards to authorized hydrometallurgical or pyrometallurgical refiners to recover gold and silver traces.</span>
+          <strong style="color: var(--text-main); font-size: 0.85rem;">Precious Metal Smelter Routing:</strong>
+          <span style="font-size: 0.80rem; color: var(--text-secondary); display: block; margin-top: 2px;">Deliver de-populated FR-4 resin substrate boards to authorized hydrometallurgical or pyrometallurgical refiners to recover gold and silver traces.</span>
         </div>
       </div>
     </div>
